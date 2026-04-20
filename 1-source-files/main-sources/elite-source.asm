@@ -33049,95 +33049,6 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: DOKEY, Removed
-\       Type: Subroutine
-\   Category: Keyboard
-\    Summary: Scan for the seven primary flight controls
-\  Deep dive: The key logger
-\             The docking computer
-\
-\ ------------------------------------------------------------------------------
-\
-\ Scan for the seven primary flight controls (or the equivalent on joystick),
-\ pause and configuration keys, and secondary flight controls, and update the
-\ key logger accordingly. Specifically:
-\
-\   * If we are on keyboard configuration, clear the key logger and update it
-\     for the seven primary flight controls, and update the pitch and roll
-\     rates accordingly.
-\
-\   * If we are on joystick configuration, clear the key logger and jump to
-\     DKJ1, which reads the joystick equivalents of the primary flight
-\     controls.
-\
-\ Both options end up at DK4 to scan for other keys, beyond the seven primary
-\ flight controls.
-\
-\ ******************************************************************************
-
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
-
-\.DOKEY
-\
-\JSR U%                 \ Call U% to clear the key logger
-\
-\LDA JSTK               \ If JSTK is non-zero, then we are configured to use
-\BNE DKJ1               \ the joystick rather than keyboard, so jump to DKJ1
-\                       \ to read the joystick flight controls, before jumping
-\                       \ to DK4 to scan for pause, configuration and secondary
-\                       \ flight keys
-\
-\LDY #7                 \ We're going to work our way through the primary flight
-\                       \ control keys (pitch, roll, speed and laser), so set a
-\                       \ counter in Y so we can loop through all 7
-\
-\.DKL2
-\
-\JSR DKS1               \ Call DKS1 to see if the KYTB key at offset Y is being
-\                       \ pressed, and set the key logger accordingly
-\
-\DEY                    \ Decrement the loop counter
-\
-\BNE DKL2               \ Loop back for the next key, working our way from A at
-\                       \ KYTB+7 down to ? at KYTB+1
-\
-\LDX JSTX               \ Set X = JSTX, the current roll rate (as shown in the
-\                       \ RL indicator on the dashboard)
-\
-\LDA #7                 \ Set A to 7, which is the amount we want to alter the
-\                       \ roll rate by if the roll keys are being pressed
-\
-\LDY KL+3               \ If the "<" key is being pressed, then call the BUMP2
-\BEQ P%+5               \ routine to increase the roll rate in X by A
-\JSR BUMP2
-\
-\LDY KL+4               \ If the ">" key is being pressed, then call the REDU2
-\BEQ P%+5               \ routine to decrease the roll rate in X by A, taking
-\JSR REDU2              \ the keyboard auto re-centre setting into account
-\
-\STX JSTX               \ Store the updated roll rate in JSTX
-\
-\ASL A                  \ Double the value of A, to 14
-\
-\LDX JSTY               \ Set X = JSTY, the current pitch rate (as shown in the
-\                       \ DC indicator on the dashboard)
-\
-\LDY KL+5               \ If the "X" key is being pressed, then call the REDU2
-\BEQ P%+5               \ routine to decrease the pitch rate in X by A, taking
-\JSR REDU2              \ the keyboard auto re-centre setting into account
-\
-\LDY KL+6               \ If the "S" key is being pressed, then call the BUMP2
-\BEQ P%+5               \ routine to increase the pitch rate in X by A
-\JSR BUMP2
-\
-\STX JSTY               \ Store the updated roll rate in JSTY
-\
-\                       \ Fall through into DK4 to scan for other keys
-
-                        \ --- End of removed code ----------------------------->
-
-\ ******************************************************************************
-\
 \       Name: DOKEY
 \       Type: Subroutine
 \   Category: Keyboard
@@ -33164,9 +33075,33 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
-
 .DOKEY
+
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+
+\JSR U%                 \ Call U% to clear the key logger
+\
+\LDA JSTK               \ If JSTK is non-zero, then we are configured to use
+\BNE DKJ1               \ the joystick rather than keyboard, so jump to DKJ1
+\                       \ to read the joystick flight controls, before jumping
+\                       \ to DK4 to scan for pause, configuration and secondary
+\                       \ flight keys
+\
+\LDY #7                 \ We're going to work our way through the primary flight
+\                       \ control keys (pitch, roll, speed and laser), so set a
+\                       \ counter in Y so we can loop through all 7
+\
+\.DKL2
+\
+\JSR DKS1               \ Call DKS1 to see if the KYTB key at offset Y is being
+\                       \ pressed, and set the key logger accordingly
+\
+\DEY                    \ Decrement the loop counter
+\
+\BNE DKL2               \ Loop back for the next key, working our way from A at
+\                       \ KYTB+7 down to ? at KYTB+1
+
+                        \ --- And replaced by: -------------------------------->
 
  LDA $41                \ ???
  BMI $47A2
@@ -33194,7 +33129,7 @@ ENDIF
  BCC L47E2
  LDA #$20
 .L47E2
- STA $8C
+ STA DELTA
  LDA #$FF
  LDX #$00
  LDY $6F
@@ -33217,10 +33152,10 @@ ENDIF
  STA $9C
  LDA #$00
 .L4806
- STA $44,X
- LDA $9C
+ STA KY3,X
+ LDA JSTX
 .L480A
- STA $9C
+ STA JSTX
  LDA #$80
  LDX #$00
  ASL $71
@@ -33228,35 +33163,46 @@ ENDIF
  BCS L4817
  INX
 .L4817
- STA $46,X
- LDA $9D
+ STA KY5,X
+ LDA JSTY
 .L481B
- STA $9D
+ STA JSTY
 .L481D
- LDX $9C
- LDA #$07
- LDY $44
- BEQ L4828
- JSR $287B
-.L4828
- LDY $45
- BEQ L482F
- JSR $288B
-.L482F
- STX $9C
- ASL A
- LDX $9D
- LDY $46
- BEQ L483B
- JSR $288B
-.L483B
- LDY $47
- BEQ L4842
- JSR $287B
-.L4842
- STX $9D
 
-                        \ --- End of added code ------------------------------->
+                        \ --- End of replacement ------------------------------>
+
+ LDX JSTX               \ Set X = JSTX, the current roll rate (as shown in the
+                        \ RL indicator on the dashboard)
+
+ LDA #7                 \ Set A to 7, which is the amount we want to alter the
+                        \ roll rate by if the roll keys are being pressed
+
+ LDY KL+3               \ If the "<" key is being pressed, then call the BUMP2
+ BEQ P%+5               \ routine to increase the roll rate in X by A
+ JSR BUMP2
+
+ LDY KL+4               \ If the ">" key is being pressed, then call the REDU2
+ BEQ P%+5               \ routine to decrease the roll rate in X by A, taking
+ JSR REDU2              \ the keyboard auto re-centre setting into account
+
+ STX JSTX               \ Store the updated roll rate in JSTX
+
+ ASL A                  \ Double the value of A, to 14
+
+ LDX JSTY               \ Set X = JSTY, the current pitch rate (as shown in the
+                        \ DC indicator on the dashboard)
+
+ LDY KL+5               \ If the "X" key is being pressed, then call the REDU2
+ BEQ P%+5               \ routine to decrease the pitch rate in X by A, taking
+ JSR REDU2              \ the keyboard auto re-centre setting into account
+
+ LDY KL+6               \ If the "S" key is being pressed, then call the BUMP2
+ BEQ P%+5               \ routine to increase the pitch rate in X by A
+ JSR BUMP2
+
+ STX JSTY               \ Store the updated roll rate in JSTY
+
+                        \ Fall through into DK4 to scan for other keys
 
 \ ******************************************************************************
 \
