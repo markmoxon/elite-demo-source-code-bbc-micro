@@ -2408,7 +2408,7 @@ ENDMACRO
  CHAR 'C'
  EQUB 0
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \CONT 13                \ Token 123:    "{crlf}
 \RTOK 92                \                COMMANDER'S NAME? "
@@ -2485,7 +2485,7 @@ ENDMACRO
  CHAR 'M'               \ Encoded as:   "I<156>M"
  EQUB 0
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \CHAR ' '               \ Token 128:    "  LOAD NEW COMMANDER (Y/N)?{crlf}
 \CHAR ' '               \                {crlf}
@@ -2614,7 +2614,7 @@ ENDMACRO
  CHAR 'T'
  EQUB 0
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \CHAR 'D'               \ Token 142:    "DANGEROUS"
 \TWOK 'A', 'N'          \
@@ -2683,7 +2683,7 @@ ENDMACRO
  CHAR 'R'
  EQUB 0
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \CHAR 'P'               \ Token 147:    "PRESS FIRE OR SPACE,COMMANDER.{crlf}
 \CHAR 'R'               \                {crlf}
@@ -2885,207 +2885,11 @@ ENDMACRO
                         \ are in our local bubble, which is the same as saying
                         \ "space station present"
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
-
-\.ECMP
-\
-\SKIP 1                 \ Our E.C.M. status
-\                       \
-\                       \   * 0 = E.C.M. is off
-\                       \
-\                       \   * Non-zero = E.C.M. is on
-\
-\.MJ
-\
-\SKIP 1                 \ Are we in witchspace (i.e. have we mis-jumped)?
-\                       \
-\                       \   * 0 = no, we are in normal space
-\                       \
-\                       \   * &FF = yes, we are in witchspace
-\
-\.LAS2
-\
-\SKIP 1                 \ Laser power for the current laser
-\                       \
-\                       \   * Bits 0-6 contain the laser power of the current
-\                       \     space view
-\                       \
-\                       \   * Bit 7 denotes whether or not the laser pulses:
-\                       \
-\                       \     * 0 = pulsing laser
-\                       \
-\                       \     * 1 = beam laser (i.e. always on)
-\
-\.MSAR
-\
-\SKIP 1                 \ The targeting state of our leftmost missile
-\                       \
-\                       \   * 0 = missile is not looking for a target, or it
-\                       \     already has a target lock (indicator is not
-\                       \     yellow/white)
-\                       \
-\                       \   * Non-zero = missile is currently looking for a
-\                       \     target (indicator is yellow/white)
-\
-\.VIEW
-\
-\SKIP 1                 \ The number of the current space view
-\                       \
-\                       \   * 0 = front
-\                       \   * 1 = rear
-\                       \   * 2 = left
-\                       \   * 3 = right
-\
-\.LASCT
-\
-\SKIP 1                 \ The laser pulse count for the current laser
-\                       \
-\                       \ This is a counter that defines the gap between the
-\                       \ pulses of a pulse laser. It is set as follows:
-\                       \
-\                       \   * 0 for a beam laser
-\                       \
-\                       \   * 10 for a pulse laser
-\                       \
-\                       \ It gets decremented every vertical sync (in the LINSCN
-\                       \ routine, which is called 50 times a second) and is set
-\                       \ to a non-zero value for pulse lasers only
-\                       \
-\                       \ The laser only fires when the value of LASCT hits
-\                       \ zero, so for pulse lasers with a value of 10, that
-\                       \ means the laser fires once every 10 vertical syncs (or
-\                       \ 5 times a second)
-\                       \
-\                       \ In comparison, beam lasers fire continuously as the
-\                       \ value of LASCT is always 0
-\
-\.GNTMP
-\
-\SKIP 1                 \ Laser temperature (or "gun temperature")
-\                       \
-\                       \ If the laser temperature exceeds 242 then the laser
-\                       \ overheats and cannot be fired again until it has
-\                       \ cooled down
-\
-\.HFX
-\
-\SKIP 1                 \ A flag that toggles the hyperspace colour effect
-\                       \
-\                       \   * 0 = no colour effect
-\                       \
-\                       \   * Non-zero = hyperspace colour effect enabled
-\                       \
-\                       \ When HFX is set to 1, the mode 4 screen that makes
-\                       \ up the top part of the display is temporarily switched
-\                       \ to mode 5 (the same screen mode as the dashboard),
-\                       \ which has the effect of blurring and colouring the
-\                       \ hyperspace rings in the top part of the screen. The
-\                       \ code to do this is in the LINSCN routine, which is
-\                       \ called as part of the screen mode routine at IRQ1.
-\                       \ It's in LINSCN that HFX is checked, and if it is
-\                       \ non-zero, the top part of the screen is not switched
-\                       \ to mode 4, thus leaving the top part of the screen in
-\                       \ the more colourful mode 5
-\
-\.EV
-\
-\SKIP 1                 \ The "extra vessels" spawning counter
-\                       \
-\                       \ This counter is set to 0 on arrival in a system and
-\                       \ following an in-system jump, and is bumped up when we
-\                       \ spawn bounty hunters or pirates (i.e. "extra vessels")
-\                       \
-\                       \ It decreases by 1 each time we consider spawning more
-\                       \ "extra vessels" in part 4 of the main game loop, so
-\                       \ increasing the value of EV has the effect of delaying
-\                       \ the spawning of more vessels
-\                       \
-\                       \ In other words, this counter stops bounty hunters and
-\                       \ pirates from continually appearing, and ensures that
-\                       \ there's a delay between spawnings
-\
-\.DLY
-\
-\SKIP 1                 \ In-flight message delay
-\                       \
-\                       \ This counter is used to keep an in-flight message up
-\                       \ for a specified time before it gets removed. The value
-\                       \ in DLY is decremented each time we start another
-\                       \ iteration of the main game loop at TT100
-\
-\.de
-\
-\SKIP 1                 \ Equipment destruction flag
-\                       \
-\                       \   * Bit 1 denotes whether or not the in-flight message
-\                       \     about to be shown by the MESS routine is about
-\                       \     destroyed equipment:
-\                       \
-\                       \     * 0 = the message is shown normally
-\                       \
-\                       \     * 1 = the string " DESTROYED" gets added to the
-\                       \       end of the message
-\
-\.LSX
-\
-\SKIP 0                 \ LSX is an alias that points to the first byte of the
-\                       \ sun line heap at LSO
-\                       \
-\                       \   * &FF indicates the sun line heap is empty
-\                       \
-\                       \   * Otherwise the LSO heap contains the line data for
-\                       \     the sun
-\
-\.LSO
-\
-\SKIP 192               \ The ship line heap for the space station (see NWSPS)
-\                       \ and the sun line heap (see SUN)
-\                       \
-\                       \ The spaces can be shared as our local bubble of
-\                       \ universe can support either the sun or a space
-\                       \ station, but not both
-\
-\.LSX2
-\
-\SKIP 78                \ The ball line heap for storing x-coordinates
-\
-\.LSY2
-\
-\SKIP 78                \ The ball line heap for storing y-coordinates
-\
-\.SY
-\
-\SKIP NOST + 1          \ This is where we store the y_hi coordinates for all
-\                       \ the stardust particles
-\
-\.SYL
-\
-\SKIP NOST + 1          \ This is where we store the y_lo coordinates for all
-\                       \ the stardust particles
-\
-\.SZ
-\
-\SKIP NOST + 1          \ This is where we store the z_hi coordinates for all
-\                       \ the stardust particles
-\
-\.SZL
-\
-\SKIP NOST + 1          \ This is where we store the z_lo coordinates for all
-\                       \ the stardust particles
-\
-\.XSAV2
-\
-\SKIP 1                 \ Temporary storage, used for storing the value of the X
-\                       \ register in the TT26 routine
-\
-\.YSAV2
-\
-\SKIP 1                 \ Temporary storage, used for storing the value of the Y
-\                       \ register in the TT26 routine
-
-                        \ --- And replaced by: -------------------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  SKIP 3                 \ These bytes appear to be unused
+
+                        \ --- End of added code ------------------------------->
 
 .ECMP
 
@@ -3283,9 +3087,11 @@ ENDMACRO
  SKIP 1                 \ Temporary storage, used for storing the value of the Y
                         \ register in the TT26 routine
 
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+
  SKIP 2                 \ These bytes appear to be unused
 
-                        \ --- End of replacement ------------------------------>
+                        \ --- End of added code ------------------------------->
 
 .MCH
 
@@ -3920,7 +3726,7 @@ ENDMACRO
                         \ a missile lock, so call the FRMIS routine to fire
                         \ the missile
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  LDA #$00               \ ???
  STA $0F14
@@ -3929,7 +3735,7 @@ ENDMACRO
 
 .MA24
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA KY12               \ If TAB is being pressed, keep going, otherwise jump
 \BEQ MA76               \ down to MA76 to skip the following
@@ -3982,7 +3788,7 @@ ENDMACRO
 
 .MA64
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA KY19               \ If "C" is being pressed, and we have a docking
 \AND DKCMP              \ computer fitted, and we are inside the space station's
@@ -4191,7 +3997,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA BOMB               \ If we set off our energy bomb (see MA24 above), then
 \BPL MA21               \ BOMB is now negative, so this skips to MA21 if our
@@ -4322,7 +4128,7 @@ ENDMACRO
                         \ missile, and it has its own dedicated collision
                         \ checks in the TACTICS routine
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \CPX #OIL               \ If ship type >= OIL (i.e. it's a cargo canister,
 \BCS P%+5               \ Thargon or escape pod), skip the JMP instruction and
@@ -4369,7 +4175,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA #3                 \ Set A to 3 to denote we may be scooping an escape pod
 \
@@ -4494,7 +4300,7 @@ ENDMACRO
  CMP #80
  BCC MA62
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  LDA #$FF               \ ???
  STA $0F4C
@@ -4514,7 +4320,7 @@ ENDMACRO
 
  JSR LAUN               \ Show the space station launch tunnel
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \JSR RES4               \ Reset the shields and energy banks, stardust and INWK
 \                       \ workspace
@@ -4650,7 +4456,7 @@ ENDMACRO
  LDA QQ11               \ If this is not a space view, jump to MA15 to skip
  BNE MA15               \ missile and laser locking
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \JSR PLUT               \ Call PLUT to update the geometric axes in INWK to
 \                       \ match the view (front, rear, left, right)
@@ -4684,7 +4490,7 @@ ENDMACRO
                         \ loop at MAL1), and set the colour of the missile
                         \ indicator to the colour in Y (red = &0E)
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  JSR $428F              \ ???
  CMP #$64
@@ -4713,7 +4519,7 @@ ENDMACRO
  SBC LAS                \ than zero, the other ship has survived the hit, so
  BCS MA14               \ jump down to MA14 to make it angry
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  LDA #$00               \ ???
  STA $0D5B
@@ -4905,7 +4711,7 @@ ENDMACRO
 
 .MA18
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA BOMB               \ If we set off our energy bomb (see MA24 above), then
 \BPL MA77               \ BOMB is now negative, so this skips to MA21 if our
@@ -5150,7 +4956,7 @@ ENDMACRO
 
 .MA22
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA MJ                 \ If we are in witchspace, jump down to MA23 to skip
 \BNE MA23               \ the following, as there are no planets or suns to
@@ -5190,73 +4996,19 @@ ENDMACRO
  JSR m                  \ Call m to calculate the maximum distance to the
                         \ planet in any of the three axes, returned in A
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \BNE MA23               \ If A > 0 then we are a fair distance away from the
 \                       \ planet in at least one axis, so jump to MA23 to skip
 \                       \ the rest of the altitude check
-\
-\JSR MAS3               \ Set A = x_hi^2 + y_hi^2 + z_hi^2, so using Pythagoras
-\                       \ we now know that A now contains the square of the
-\                       \ distance between our ship (at the origin) and the
-\                       \ centre of the planet at (x_hi, y_hi, z_hi)
-\
-\BCS MA23               \ If the C flag was set by MAS3, then the result
-\                       \ overflowed (was greater than &FF) and we are still a
-\                       \ fair distance from the planet, so jump to MA23 as we
-\                       \ haven't crashed into the planet
-\
-\SBC #36                \ Subtract 37 from x_hi^2 + y_hi^2 + z_hi^2
-\                       \
-\                       \ The SBC subtracts 37 as we just passed through a BCS
-\                       \ so we know the C flag is clear
-\                       \
-\                       \ When we do the 3D Pythagoras calculation, we only use
-\                       \ the high bytes of the coordinates, so that's x_hi,
-\                       \ y_hi and z_hi and
-\                       \
-\                       \ The planet radius is (0 96 0), as defined in the
-\                       \ PLANET routine, so the high byte is 96
-\                       \
-\                       \ When we square the coordinates above and add them,
-\                       \ the result gets divided by 256 (otherwise the result
-\                       \ wouldn't fit into one byte), so if we do the same for
-\                       \ the planet's radius, we get:
-\                       \
-\                       \   96 * 96 / 256 = 36
-\                       \
-\                       \ So for the planet, the equivalent figure to test the
-\                       \ sum of the _hi bytes against is 36, so A now contains
-\                       \ the high byte of our altitude above the planet
-\                       \ surface, squared, with an extra 1 subtracted so the
-\                       \ test in the next instruction will ensure we crash
-\                       \ even if we are exactly one planet radius away
-\
-\BCC MA28               \ If A < 0 then jump to MA28 as we have crashed into
-\                       \ the planet
-\
-\STA R                  \ We are getting close to the planet, so we need to
-\JSR LL5                \ work out how close. We know from the above that A
-\                       \ contains our altitude squared, so we store A in R
-\                       \ and call LL5 to calculate:
-\                       \
-\                       \   Q = SQRT(R Q) = SQRT(A Q)
-\                       \
-\                       \ Interestingly, Q doesn't appear to be set to 0 for
-\                       \ this calculation, so presumably this doesn't make a
-\                       \ difference
-\
-\LDA Q                  \ Store the result in ALTIT, our altitude
-\STA ALTIT
-\
-\BNE MA23               \ If our altitude is non-zero then we haven't crashed,
-\                       \ so jump to MA23 to skip to the next section
 
                         \ --- And replaced by: -------------------------------->
 
  BNE MA23S              \ If A > 0 then we are a fair distance away from the
                         \ planet in at least one axis, so jump to MA23 to skip
                         \ the rest of the altitude check
+
+                        \ --- End of replacement ------------------------------>
 
  JSR MAS3               \ Set A = x_hi^2 + y_hi^2 + z_hi^2, so using Pythagoras
                         \ we now know that A now contains the square of the
@@ -5311,6 +5063,13 @@ ENDMACRO
  LDA Q                  \ Store the result in ALTIT, our altitude
  STA ALTIT
 
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+
+\BNE MA23               \ If our altitude is non-zero then we haven't crashed,
+\                       \ so jump to MA23 to skip to the next section
+
+                        \ --- And replaced by: -------------------------------->
+
  BNE MA23S              \ If our altitude is non-zero then we haven't crashed,
                         \ so jump to MA23 to skip to the next section
 
@@ -5325,7 +5084,7 @@ ENDMACRO
 
 .MA29
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \CMP #20                \ If this is the 20th iteration in this block of 32,
 \BNE MA23               \ do the following, otherwise jump to MA23 to skip the
@@ -5347,40 +5106,6 @@ ENDMACRO
 \BNE MA23               \ sun in any of the three axes, and if it's non-zero,
 \                       \ jump to MA23 to skip the following, as we are too far
 \                       \ from the sun for scooping or temperature changes
-\
-\JSR MAS3               \ Set (A ?) = x_hi^2 + y_hi^2 + z_hi^2, so using
-\                       \ Pythagoras we now know that A now contains the high
-\                       \ byte of the square of the distance between our ship
-\                       \ (at the origin) and the heart of the sun at coordinate
-\                       \ (x_hi, y_hi, z_hi)
-\                       \
-\                       \ If the calculation overflows so it doesn't fit into
-\                       \ one byte, then A is set to &FF and the C flag is set
-\
-\EOR #%11111111         \ Invert A, so A is now small if we are far from the
-\                       \ sun and large if we are close to the sun, in the
-\                       \ range 0 = far away to &FF = extremely close, ouch,
-\                       \ hot, hot, hot!
-\
-\ADC #30                \ Add the minimum cabin temperature of 30, plus the C
-\                       \ flag, so we get one of the following:
-\                       \
-\                       \
-\                       \   * If the MAS3 calculation overflowed then we are a
-\                       \     long way from the sun, A will be zero and the C
-\                       \     flag will be set, so this addition sets A = 31
-\                       \     and clears the C flag
-\                       \
-\                       \   * If the result of the MAS3 calculation fitted into
-\                       \     one byte, then A will be in the range 0 to 255 and
-\                       \     the C flag will be clear, so this addition has a
-\                       \     result in the range 0 to 285, with the higher
-\                       \     values overflowing the addition and setting the
-\                       \     C flag
-\                       \
-\                       \ So the C flag is set if the cabin temperature is too
-\                       \ hot to handle, and if it's clear then A contains the
-\                       \ cabin temperature
 
                         \ --- And replaced by: -------------------------------->
 
@@ -5404,6 +5129,8 @@ ENDMACRO
  BNE MA23S              \ sun in any of the three axes, and if it's non-zero,
                         \ jump to MA23 to skip the following, as we are too far
                         \ from the sun for scooping or temperature changes
+
+                        \ --- End of replacement ------------------------------>
 
  JSR MAS3               \ Set (A ?) = x_hi^2 + y_hi^2 + z_hi^2, so using
                         \ Pythagoras we now know that A now contains the high
@@ -5437,8 +5164,6 @@ ENDMACRO
                         \ So the C flag is set if the cabin temperature is too
                         \ hot to handle, and if it's clear then A contains the
                         \ cabin temperature
-
-                        \ --- End of replacement ------------------------------>
 
  STA CABTMP             \ Store the updated cabin temperature
 
@@ -5559,7 +5284,7 @@ ENDMACRO
  BNE MA9                \ then jump to MA9 to return from the main flight loop
                         \ (as MA9 is an RTS)
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \JMP STARS              \ This is a space view, so jump to the STARS routine to
 \                       \ process the stardust, and return from the main flight
@@ -7475,7 +7200,7 @@ ENDMACRO
 
 .NA%
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \EQUS "JAMESON"         \ The current commander name, which defaults to JAMESON
 \EQUB 13                \
@@ -7516,7 +7241,7 @@ ENDMACRO
  EQUW &0248             \ QQ21 = Seed s1 for system 0, galaxy 0 (Tibedied), #5-6
  EQUW &B753             \ QQ21 = Seed s2 for system 0, galaxy 0 (Tibedied), #7-8
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \IF Q%
 \EQUD &00CA9A3B         \ CASH = Amount of cash (100,000,000 Cr), #9-12
@@ -7538,7 +7263,7 @@ ENDMACRO
 
  EQUB 0                 \ GCNT = Galaxy number, 0-7, #15
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \EQUB POW+(128 AND Q%)  \ LASER = Front laser, #16
 \
@@ -7586,7 +7311,7 @@ ENDMACRO
 
  EQUB Q% AND 127        \ BOMB = Energy bomb, #42
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \EQUB Q% AND 1          \ ENGY = Energy/shield level, #43
 
@@ -7654,7 +7379,7 @@ ENDMACRO
 
 .CHK2
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \EQUB &03 EOR &A9       \ The checksum value for the default commander, EOR'd
 \                       \ with &A9 to make it harder to tamper with the checksum
@@ -7689,7 +7414,7 @@ ENDMACRO
 
 .CHK
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \EQUB &03               \ The checksum value for the default commander, #75
 
@@ -9496,7 +9221,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.FLIP
 \
@@ -9548,7 +9273,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.STARS
 \
@@ -9973,7 +9698,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.STARS6
 \
@@ -12489,7 +12214,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.ESCAPE
 \
@@ -12813,7 +12538,7 @@ ENDMACRO
 
 .TACTICS
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  LDA #3                 \ Set RAT = 3, which is the magnitude we set the pitch
  STA RAT                \ or roll counter to in part 7 when turning a ship
@@ -13116,7 +12841,7 @@ ENDMACRO
 
 .TA16
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \JMP SFRMIS             \ Jump to SFRMIS to spawn a missile as a child of the
 \                       \ current ship, make a noise and print a message warning
@@ -13222,7 +12947,7 @@ ENDMACRO
 
  DEC INWK+28            \ Halve the attacking ship's acceleration in byte #28
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA ECMA               \ If an E.C.M. is currently active (either ours or an
 \BNE TA10               \ opponent's), return from the subroutine without making
@@ -13333,7 +13058,7 @@ ENDMACRO
                         \ here, but we also get here if the ship is either far
                         \ away and aggressive, or not too close
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA XX15               \ Reverse the signs of XX15 and the dot product in CNT,
 \EOR #%10000000         \ starting with the x-coordinate
@@ -13389,7 +13114,7 @@ ENDMACRO
                         \ other words if the ship should pull up to head in the
                         \ direction of XX15
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \EOR #%10000000         \ Set the ship's pitch counter to 3, with the opposite
 \AND #%10000000         \ sign to the dot product result, which gently pitches
@@ -13432,7 +13157,7 @@ ENDMACRO
                         \ ship, in other words if the ship should roll right to
                         \ head in the direction of XX15
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \EOR INWK+30            \ Set the ship's roll counter to 5, with the sign set to
 \AND #%10000000         \ positive (clockwise roll) if the pitch counter and dot
@@ -13467,7 +13192,7 @@ ENDMACRO
  BMI TA9                \ TA9, as the ships are facing away from each other and
                         \ the ship might want to slow down to take another shot
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \CMP #22                \ The dot product is positive, so the ships are facing
 \BCC TA9                \ each other. If A < 22 then the ships are not heading
@@ -14587,7 +14312,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.STARS2
 \
@@ -16625,7 +16350,7 @@ ENDMACRO
 
 .cntr
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA DAMP               \ If DAMP is non-zero, then keyboard damping is not
 \BNE RE1                \ enabled, so jump to RE1 to return from the subroutine
@@ -16786,7 +16511,7 @@ ENDMACRO
 
                         \ Jumps to RE3+2 end up here
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \                       \ If we get here, then we need to apply auto-recentre,
 \                       \ if it is configured
@@ -17020,7 +16745,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.WARP
 \
@@ -17265,7 +16990,7 @@ ENDMACRO
 
 .LASLI2
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA QQ11               \ If this is not a space view (i.e. QQ11 is non-zero)
 \BNE PU1-1              \ then jump to MA9 to return from the main flight loop
@@ -17347,7 +17072,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.PLUT
 \
@@ -17531,7 +17256,7 @@ ENDMACRO
  LDY QQ11               \ If the current view is not a space view, jump up to LQ
  BNE LQ                 \ to set up a new space view
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \CPX VIEW               \ If the current view is already of type X, jump to LO2
 \BEQ LO2                \ to return from the subroutine (as LO2 contains an RTS)
@@ -17720,7 +17445,7 @@ ENDIF
  LDY #11                \ Move the text cursor to row 11
  STY XC
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA VIEW               \ Load the current view into A:
 \                       \
@@ -17851,7 +17576,7 @@ ENDIF
  BNE DELAY              \ If Y isn't yet at zero, jump back to DELAY to wait
                         \ for another vertical sync
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  PHA                    \ ???
  TXA
@@ -19106,7 +18831,7 @@ ENDIF
 
  JSR TT162              \ Print a space
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA #'k'               \ Print "km", returning from the subroutine using a
 \JSR TT26               \ tail call
@@ -19807,7 +19532,7 @@ ENDIF
 
 .BAY2
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA #f9                \ Jump into the main loop at FRCE, setting the key
 \JMP FRCE               \ "pressed" to red key f9 (so we show the Inventory
@@ -19878,7 +19603,7 @@ ENDIF
 
 .gnum
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDX #0                 \ We will build the number entered in R, so initialise
 \STX R                  \ it with 0
@@ -20142,7 +19867,7 @@ ENDIF
  JMP BAY2               \ And then jump to BAY2 to display the Inventory
                         \ screen, as we have finished selling cargo
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \RTS                    \ Return from the subroutine
 
@@ -21856,7 +21581,7 @@ ENDIF
  CMP #17                \ last item
  BCC TT168
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \RTS                    \ Return from the subroutine
 
@@ -22178,7 +21903,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.ptg
 \
@@ -22267,7 +21992,7 @@ ENDIF
 
 .ee5
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \JSR CTRL               \ Scan the keyboard to see if CTRL is currently pressed,
 \                       \ returning a negative value in A if it is
@@ -22383,14 +22108,7 @@ ENDIF
 
  STA FIST               \ Update our legal status with the new value
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
-
-\.NLUNCH
-\
-\LDX #0                 \ Set QQ12 to 0 to indicate we are not docked
-\STX QQ12
-
-                        \ --- And replaced by: -------------------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  LDX #0                 \ Set QQ12 to 0 to indicate we are not docked
  STX QQ12
@@ -22398,11 +22116,13 @@ ENDIF
  JSR LOOK1              \ ???
  LDA #$74
  JMP FRCE
-.NLUNCH
- LDX #$00
- STX $9F
 
-                        \ --- End of replacement ------------------------------>
+                        \ --- End of added code ------------------------------->
+
+.NLUNCH
+
+ LDX #0                 \ Set QQ12 to 0 to indicate we are not docked
+ STX QQ12
 
  JMP LOOK1              \ Jump to LOOK1 to switch to the front view (X = 0),
                         \ returning from the subroutine using a tail call
@@ -22615,7 +22335,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.bay
 \
@@ -22674,7 +22394,7 @@ ENDIF
                         \ years of fuel would be 14.0 Cr, or a PRXS value of
                         \ 140)
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  LDA #3                 \ ???
  STA QQ25
@@ -22731,7 +22451,7 @@ ENDIF
  LDA #127               \ Print recursive token 127 ("ITEM") followed by a
  JSR prq                \ question mark
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \JSR gnum               \ Call gnum to get a number from the keyboard, which
 \                       \ will be the number of the item we want to purchase,
@@ -22971,7 +22691,7 @@ ENDIF
  JSR dn2                \ Call dn2 to make a short, high beep and delay for 1
                         \ second
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
 \                       \ Status Mode screen)
@@ -24735,7 +24455,7 @@ ENDIF
 
 .SOLAR
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  LDA #$FF               \ ???
  STA $0D5D
@@ -25817,7 +25537,7 @@ ENDIF
                         \ when we are done, copying the block from INWK into
                         \ the K% workspace (specifically, to INF)
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  STX $0F13              \ ???
 
@@ -28874,7 +28594,7 @@ ENDIF
                         \ (or the equivalent on joystick) and update the key
                         \ logger, setting KL to the key pressed
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA JSTK               \ If the joystick is not configured, jump down to TJ1,
 \BEQ TJ1                \ otherwise we move the cursor with the joystick
@@ -28935,7 +28655,7 @@ ENDIF
 
 .TJ1
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA KL                 \ Set A to the value of KL (the key pressed)
 \
@@ -29319,7 +29039,7 @@ ENDIF
 
 .KS5
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  LDA $0D5B              \ ???
  CMP $A7
@@ -29415,7 +29135,7 @@ ENDIF
  LDA FRIN,X             \ Copy the contents of the source slot into the
  STA FRIN-1,X           \ destination slot
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \BEQ KS2                \ If the slot we just shuffled down contains 0, then
 \                       \ the source slot is empty and we are done shuffling,
@@ -29668,7 +29388,7 @@ ENDIF
                         \ slots for the local bubble of universe, and various
                         \ flight and ship status variables
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  STA $0D5D              \ ???
 
@@ -30620,7 +30340,7 @@ ENDIF
 
 .TT102
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \CMP #f8                \ If red key f8 was pressed, jump to STATUS to show the
 \BNE P%+5               \ Status Mode screen, returning from the subroutine
@@ -30678,7 +30398,7 @@ ENDIF
  BNE P%+5               \ Buy Cargo screen, returning from the subroutine using
  JMP TT219              \ a tail call
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \CMP #&47               \ If "@" was pressed, jump to SVE to save the commander
 \BNE P%+5               \ file, returning from the subroutine using a tail call
@@ -31165,7 +30885,7 @@ ENDIF
  JSR TITLE              \ returning with the internal number of the key pressed
                         \ in A
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \CMP #&44               \ Did we press "Y"? If not, jump to QU5, otherwise
 \BNE QU5                \ continue on to load a new commander
@@ -31189,7 +30909,7 @@ ENDIF
 \
 \BCC QU5
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \JSR GTNME              \ We want to load a new commander, so we need to get
 \                       \ the commander name to load
@@ -31261,7 +30981,7 @@ ENDIF
                         \ If the commander check below fails, we keep jumping
                         \ back to here to crash the game with an infinite loop
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \JSR CHECK              \ Call the CHECK subroutine to calculate the checksum
 \                       \ for the current commander block at NA%+8 and put it
@@ -31360,7 +31080,7 @@ ENDIF
  LDA #&FF               \ Set QQ12 = &FF (the docked flag) to indicate that we
  STA QQ12               \ are docked
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  LDA #f8                \ ???
  JSR $43D2
@@ -31495,7 +31215,7 @@ ENDIF
 
 .TLL2
 
-                        \ --- Mod: Code added for Elite-A: -------------------->
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
  LDA #$FF               \ ???
  STA $99
@@ -31527,7 +31247,7 @@ ENDIF
 
  DEC MCNT               \ Decrement the main loop counter
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
 \
@@ -31588,7 +31308,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.CHECK
 \
@@ -31633,7 +31353,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.TRNME
 \
@@ -31666,7 +31386,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.TR1
 \
@@ -31711,7 +31431,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.GTNME
 \
@@ -31769,7 +31489,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.RLINE
 \
@@ -31897,6 +31617,133 @@ ENDIF
 
 \ ******************************************************************************
 \
+\       Name: SVE, Removed
+\       Type: Subroutine
+\   Category: Save and load
+\    Summary: Save the commander file
+\  Deep dive: Commander save files
+\             The competition code
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+
+\.SVE
+\
+\JSR GTNME              \ Clear the screen and ask for the commander filename
+\                       \ to save, storing the name at INWK
+\
+\JSR TRNME              \ Transfer the commander filename from INWK to NA%
+\
+\JSR ZERO               \ Zero-fill pages &9, &A, &B, &C and &D, which clears
+\                       \ the ship data blocks, the ship line heap, the ship
+\                       \ slots for the local bubble of universe, and various
+\                       \ flight and ship status variables
+\
+\LSR SVC                \ Halve the save count value in SVC
+\
+\LDX #NT%               \ We now want to copy the current commander data block
+\                       \ from location TP to the last saved commander block at
+\                       \ NA%+8, so set a counter in X to copy the NT% bytes in
+\                       \ the commander data block
+\                       \
+\                       \ We also want to copy the data block to another
+\                       \ location &0B00, which is normally used for the ship
+\                       \ lines heap
+\
+\.SVL1
+\
+\LDA TP,X               \ Copy the X-th byte of TP to the X-th byte of &0B00
+\STA &0B00,X            \ and NA%+8
+\STA NA%+8,X
+\
+\DEX                    \ Decrement the loop counter
+\
+\BPL SVL1               \ Loop back until we have copied all the bytes in the
+\                       \ commander data block
+\
+\JSR CHECK              \ Call CHECK to calculate the checksum for the last
+\                       \ saved commander and return it in A
+\
+\STA CHK                \ Store the checksum in CHK, which is at the end of the
+\                       \ last saved commander block
+\
+\PHA                    \ Store the checksum on the stack
+\
+\ORA #%10000000         \ Set K = checksum with bit 7 set
+\STA K
+\
+\EOR COK                \ Set K+2 = K EOR COK (the competition flags)
+\STA K+2
+\
+\EOR CASH+2             \ Set K+1 = K+2 EOR CASH+2 (the third cash byte)
+\STA K+1
+\
+\EOR #&5A               \ Set K+3 = K+1 EOR &5A EOR TALLY+1 (the high byte of
+\EOR TALLY+1            \ the kill tally)
+\STA K+3
+\
+\JSR BPRNT              \ Print the competition number stored in K to K+3. The
+\                       \ value of U might affect how this is printed, and as
+\                       \ it's a temporary variable in zero page that isn't
+\                       \ reset by ZERO, it might have any value, but as the
+\                       \ competition code is a 10-digit number, this just means
+\                       \ it may or may not have an extra space of padding
+\
+\JSR TT67               \ Call TT67 twice to print two newlines
+\JSR TT67
+\
+\PLA                    \ Restore the checksum from the stack
+\
+\STA &0B00+NT%          \ Store the checksum in the last byte of the save file
+\                       \ at &0B00 (the equivalent of CHK in the last saved
+\                       \ block)
+\
+\EOR #&A9               \ Store the checksum EOR &A9 in CHK2, the penultimate
+\STA CHK2               \ byte of the last saved commander block
+\
+\STA &0AFF+NT%          \ Store the checksum EOR &A9 in the penultimate byte of
+\                       \ the save file at &0B00 (the equivalent of CHK2 in the
+\                       \ last saved block)
+\
+\LDY #&B                \ Set up an OSFILE block at &0C00, containing:
+\STY &0C0B              \
+\INY                    \ Start address for save = &00000B00 in &0C0A to &0C0D
+\STY &0C0F              \
+\                       \ End address for save = &00000C00 in &0C0E to &0C11
+\                       \
+\                       \ Y is left containing &C which we use below
+\
+\LDA #%10000001         \ Clear 6522 System VIA interrupt enable register IER
+\STA VIA+&4E            \ (SHEILA &4E) bit 1 (i.e. enable the CA2 interrupt,
+\                       \ which comes from the keyboard)
+\
+\INC SVN                \ Increment SVN to indicate we are about to start saving
+\
+\LDA #0                 \ Call QUS1 with A = 0, Y = &C to save the commander
+\JSR QUS1               \ file with the filename we copied to INWK at the start
+\                       \ of this routine
+\
+\LDX #0                 \ Set X = 0 for storing in SVN below
+\
+\\STX VIA+&4E           \ This instruction is commented out in the original
+\                       \ source. It would affect the 6522 System VIA interrupt
+\                       \ enable register IER (SHEILA &4E) if any of bits 0-6
+\                       \ of X were set, but they aren't, so this instruction
+\                       \ would have no effect anyway
+\
+\\DEX                   \ This instruction is commented out in the original
+\                       \ source. It would end up setting SVN to &FF, which
+\                       \ affects the logic in the IRQ1 handler
+\
+\STX SVN                \ Set SVN to 0 to indicate we are done saving
+\
+\JMP BAY                \ Go to the docking bay (i.e. show Status Mode)
+
+                        \ --- End of removed code ----------------------------->
+
+\ ******************************************************************************
+\
 \       Name: SVE
 \       Type: Subroutine
 \   Category: Save and load
@@ -31905,6 +31752,8 @@ ENDIF
 \             The competition code
 \
 \ ******************************************************************************
+
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
 .SVE
 
@@ -31927,6 +31776,8 @@ ENDIF
                         \ End address for save = &00000C00 in &0C0E to &0C11
                         \
                         \ Y is left containing &C which we use below
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -31959,7 +31810,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.QUS1
 \
@@ -31988,7 +31839,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.LOD
 \
@@ -32372,7 +32223,7 @@ ENDIF
 
 .RDKEY
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \LDX #16                \ Start the scan with internal key number 16 ("Q")
 \
@@ -33034,7 +32885,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \.DKS3
 \
@@ -33164,7 +33015,7 @@ ENDIF
 
  DEY                    \ Decrement the counter
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \BNE DKL3               \ And loop back for the next key, until we have just
 \                       \ cleared KL+1. We don't want to clear the first key
@@ -33198,6 +33049,95 @@ ENDIF
 
 \ ******************************************************************************
 \
+\       Name: DOKEY, Removed
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Scan for the seven primary flight controls
+\  Deep dive: The key logger
+\             The docking computer
+\
+\ ------------------------------------------------------------------------------
+\
+\ Scan for the seven primary flight controls (or the equivalent on joystick),
+\ pause and configuration keys, and secondary flight controls, and update the
+\ key logger accordingly. Specifically:
+\
+\   * If we are on keyboard configuration, clear the key logger and update it
+\     for the seven primary flight controls, and update the pitch and roll
+\     rates accordingly.
+\
+\   * If we are on joystick configuration, clear the key logger and jump to
+\     DKJ1, which reads the joystick equivalents of the primary flight
+\     controls.
+\
+\ Both options end up at DK4 to scan for other keys, beyond the seven primary
+\ flight controls.
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+
+\.DOKEY
+\
+\JSR U%                 \ Call U% to clear the key logger
+\
+\LDA JSTK               \ If JSTK is non-zero, then we are configured to use
+\BNE DKJ1               \ the joystick rather than keyboard, so jump to DKJ1
+\                       \ to read the joystick flight controls, before jumping
+\                       \ to DK4 to scan for pause, configuration and secondary
+\                       \ flight keys
+\
+\LDY #7                 \ We're going to work our way through the primary flight
+\                       \ control keys (pitch, roll, speed and laser), so set a
+\                       \ counter in Y so we can loop through all 7
+\
+\.DKL2
+\
+\JSR DKS1               \ Call DKS1 to see if the KYTB key at offset Y is being
+\                       \ pressed, and set the key logger accordingly
+\
+\DEY                    \ Decrement the loop counter
+\
+\BNE DKL2               \ Loop back for the next key, working our way from A at
+\                       \ KYTB+7 down to ? at KYTB+1
+\
+\LDX JSTX               \ Set X = JSTX, the current roll rate (as shown in the
+\                       \ RL indicator on the dashboard)
+\
+\LDA #7                 \ Set A to 7, which is the amount we want to alter the
+\                       \ roll rate by if the roll keys are being pressed
+\
+\LDY KL+3               \ If the "<" key is being pressed, then call the BUMP2
+\BEQ P%+5               \ routine to increase the roll rate in X by A
+\JSR BUMP2
+\
+\LDY KL+4               \ If the ">" key is being pressed, then call the REDU2
+\BEQ P%+5               \ routine to decrease the roll rate in X by A, taking
+\JSR REDU2              \ the keyboard auto re-centre setting into account
+\
+\STX JSTX               \ Store the updated roll rate in JSTX
+\
+\ASL A                  \ Double the value of A, to 14
+\
+\LDX JSTY               \ Set X = JSTY, the current pitch rate (as shown in the
+\                       \ DC indicator on the dashboard)
+\
+\LDY KL+5               \ If the "X" key is being pressed, then call the REDU2
+\BEQ P%+5               \ routine to decrease the pitch rate in X by A, taking
+\JSR REDU2              \ the keyboard auto re-centre setting into account
+\
+\LDY KL+6               \ If the "S" key is being pressed, then call the BUMP2
+\BEQ P%+5               \ routine to increase the pitch rate in X by A
+\JSR BUMP2
+\
+\STX JSTY               \ Store the updated roll rate in JSTY
+\
+\                       \ Fall through into DK4 to scan for other keys
+
+                        \ --- End of removed code ----------------------------->
+
+\ ******************************************************************************
+\
 \       Name: DOKEY
 \       Type: Subroutine
 \   Category: Keyboard
@@ -33223,6 +33163,8 @@ ENDIF
 \ flight controls.
 \
 \ ******************************************************************************
+
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
 
 .DOKEY
 
@@ -33313,6 +33255,9 @@ ENDIF
  JSR $287B
 .L4842
  STX $9D
+
+                        \ --- End of added code ------------------------------->
+
 \ ******************************************************************************
 \
 \       Name: DK4
@@ -33338,7 +33283,7 @@ ENDIF
 
 .DK4
 
-                        \ --- Mod: Code removed for Elite-A: ------------------>
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
 
 \JSR RDKEY              \ Scan the keyboard for a key press and return the
 \                       \ internal key number in A and X (or 0 for no key press)
@@ -33488,6 +33433,84 @@ ENDIF
 
 \ ******************************************************************************
 \
+\       Name: TT217, Removed
+\       Type: Subroutine
+\   Category: Keyboard
+\    Summary: Scan the keyboard until a key is pressed
+\
+\ ------------------------------------------------------------------------------
+\
+\ Scan the keyboard until a key is pressed, and return the key's ASCII code.
+\ If, on entry, a key is already being held down, then wait until that key is
+\ released first (so this routine detects the first key down event following
+\ the subroutine call).
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   X                   The ASCII code of the key that was pressed
+\
+\   A                   Contains the same as X
+\
+\   Y                   Y is preserved
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   out                 Contains an RTS
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+
+\.TT217
+\
+\STY YSAV               \ Store Y in temporary storage, so we can restore it
+\                       \ later
+\
+\.t
+\
+\JSR DELAY-5            \ Wait for 8/50 of a second (0.16 seconds) to implement
+\                       \ a simple keyboard debounce and prevent multiple key
+\                       \ presses being recorded
+\
+\JSR RDKEY              \ Scan the keyboard for a key press and return the
+\                       \ internal key number in A and X (or 0 for no key press)
+\
+\BNE t                  \ If a key was already being held down when we entered
+\                       \ this routine, keep looping back up to t, until the
+\                       \ key is released
+\
+\.t2
+\
+\JSR RDKEY              \ Any pre-existing key press is now gone, so we can
+\                       \ start scanning the keyboard again, returning the
+\                       \ internal key number in A and X (or 0 for no key press)
+\
+\BEQ t2                 \ Keep looping up to t2 until a key is pressed
+\
+\TAY                    \ Copy A to Y, so Y contains the internal key number
+\                       \ of the key pressed
+\
+\LDA (TRTB%),Y          \ The address in TRTB% points to the MOS key
+\                       \ translation table, which is used to translate
+\                       \ internal key numbers to ASCII, so this fetches the
+\                       \ key's ASCII code into A
+\
+\LDY YSAV               \ Restore the original value of Y we stored above
+\
+\TAX                    \ Copy A into X
+\
+\.out
+\
+\RTS                    \ Return from the subroutine
+
+                        \ --- End of removed code ----------------------------->
+
+\ ******************************************************************************
+\
 \       Name: TT217
 \       Type: Subroutine
 \   Category: Keyboard
@@ -33518,6 +33541,8 @@ ENDIF
 \
 \ ******************************************************************************
 
+                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+
 .TT217
 
  STY YSAV               \ Store Y in temporary storage, so we can restore it
@@ -33528,7 +33553,11 @@ ENDIF
 
 .out
 
- RTS                    \ Return from the subroutine\ ******************************************************************************
+ RTS                    \ Return from the subroutine
+
+                        \ --- End of added code ------------------------------->
+
+\ ******************************************************************************
 \
 \       Name: me1
 \       Type: Subroutine
