@@ -1280,7 +1280,7 @@ ENDIF
 
  CLI                    \ Re-enable interrupts
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \IF DISC
 \

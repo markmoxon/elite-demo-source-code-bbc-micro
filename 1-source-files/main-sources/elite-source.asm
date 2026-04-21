@@ -2408,7 +2408,7 @@ ENDMACRO
  CHAR 'C'
  EQUB 0
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \CONT 13                \ Token 123:    "{crlf}
 \RTOK 92                \                COMMANDER'S NAME? "
@@ -2485,7 +2485,7 @@ ENDMACRO
  CHAR 'M'               \ Encoded as:   "I<156>M"
  EQUB 0
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \CHAR ' '               \ Token 128:    "  LOAD NEW COMMANDER (Y/N)?{crlf}
 \CHAR ' '               \                {crlf}
@@ -2614,7 +2614,7 @@ ENDMACRO
  CHAR 'T'
  EQUB 0
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \CHAR 'D'               \ Token 142:    "DANGEROUS"
 \TWOK 'A', 'N'          \
@@ -2683,7 +2683,7 @@ ENDMACRO
  CHAR 'R'
  EQUB 0
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \CHAR 'P'               \ Token 147:    "PRESS FIRE OR SPACE,COMMANDER.{crlf}
 \CHAR 'R'               \                {crlf}
@@ -2885,9 +2885,19 @@ ENDMACRO
                         \ are in our local bubble, which is the same as saying
                         \ "space station present"
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- SKIP 3                 \ These bytes appear to be unused
+.L0D5B
+
+ SKIP 1                 \ ???
+
+.L0D5C
+
+ SKIP 1                 \ ???
+
+.L0D5D
+
+ SKIP 1                 \ ???
 
                         \ --- End of added code ------------------------------->
 
@@ -3087,9 +3097,15 @@ ENDMACRO
  SKIP 1                 \ Temporary storage, used for storing the value of the Y
                         \ register in the TT26 routine
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- SKIP 2                 \ These bytes appear to be unused
+.L0F13
+
+ SKIP 1                 \ ???
+
+.L0F14
+
+ SKIP 1                 \ ???
 
                         \ --- End of added code ------------------------------->
 
@@ -3726,16 +3742,16 @@ ENDMACRO
                         \ a missile lock, so call the FRMIS routine to fire
                         \ the missile
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #$00               \ ???
- STA $0F14
+ LDA #0               \ ???
+ STA L0F14
 
                         \ --- End of added code ------------------------------->
 
 .MA24
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA KY12               \ If TAB is being pressed, keep going, otherwise jump
 \BEQ MA76               \ down to MA76 to skip the following
@@ -3788,7 +3804,7 @@ ENDMACRO
 
 .MA64
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA KY19               \ If "C" is being pressed, and we have a docking
 \AND DKCMP              \ computer fitted, and we are inside the space station's
@@ -3811,10 +3827,11 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- LDA $50                \ ???
- AND $032C
- BEQ $1006
- STA $0D5D
+ LDA KY19               \ ???
+ AND DKCMP
+ BEQ MA68
+
+ STA L0D5D
 
                         \ --- End of replacement ------------------------------>
 
@@ -3997,7 +4014,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA BOMB               \ If we set off our energy bomb (see MA24 above), then
 \BPL MA21               \ BOMB is now negative, so this skips to MA21 if our
@@ -4128,7 +4145,7 @@ ENDMACRO
                         \ missile, and it has its own dedicated collision
                         \ checks in the TACTICS routine
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \CPX #OIL               \ If ship type >= OIL (i.e. it's a cargo canister,
 \BCS P%+5               \ Thargon or escape pod), skip the JMP instruction and
@@ -4151,7 +4168,7 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- JMP &10F1              \ ???
+ JMP MA58               \ Jump to MA58 to process a potential collision
 
                         \ --- End of replacement ------------------------------>
 
@@ -4175,7 +4192,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA #3                 \ Set A to 3 to denote we may be scooping an escape pod
 \
@@ -4300,10 +4317,10 @@ ENDMACRO
  CMP #80
  BCC MA62
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #$FF               \ ???
- STA $0F4C
+ LDA #&FF               \ ???
+ STA PATG
 
                         \ --- End of added code ------------------------------->
 
@@ -4320,7 +4337,7 @@ ENDMACRO
 
  JSR LAUN               \ Show the space station launch tunnel
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \JSR RES4               \ Reset the shields and energy banks, stardust and INWK
 \                       \ workspace
@@ -4456,7 +4473,7 @@ ENDMACRO
  LDA QQ11               \ If this is not a space view, jump to MA15 to skip
  BNE MA15               \ missile and laser locking
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \JSR PLUT               \ Call PLUT to update the geometric axes in INWK to
 \                       \ match the view (front, rear, left, right)
@@ -4490,13 +4507,14 @@ ENDMACRO
                         \ loop at MAL1), and set the colour of the missile
                         \ indicator to the colour in Y (red = &0E)
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- JSR $428F              \ ???
- CMP #$64
- BCC $1127
- LDA #$65
- JSR $4737
+ JSR DORND              \ ???
+ CMP #100
+ BCC MA47
+
+ LDA #101
+ JSR sub_C4737
 
                         \ --- End of added code ------------------------------->
 
@@ -4519,10 +4537,10 @@ ENDMACRO
  SBC LAS                \ than zero, the other ship has survived the hit, so
  BCS MA14               \ jump down to MA14 to make it angry
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #$00               \ ???
- STA $0D5B
+ LDA #0                 \ ???
+ STA L0D5B
 
                         \ --- End of added code ------------------------------->
 
@@ -4711,7 +4729,7 @@ ENDMACRO
 
 .MA18
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA BOMB               \ If we set off our energy bomb (see MA24 above), then
 \BPL MA77               \ BOMB is now negative, so this skips to MA21 if our
@@ -4746,23 +4764,31 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- LDA $99                \ ???
- CMP #$C8
- BNE $11DB
- JSR $428F
- CMP #$64
- BCS L11D1
- LDA $0D5C
- STA $0D5B
-.L11D1
- LDA #$FF
- STA $0F14
- LDA #$7B
- JMP $12C6
+ LDA MCNT               \ ???
+ CMP #200
+ BNE L11DB
 
-                        \ ???
- AND #7                 \ jumping to MA22 if it is non-zero (so the following
- BNE MA22               \ code only runs every 8 iterations of the main loop)
+ JSR DORND
+
+ CMP #100
+ BCS L11D1
+
+ LDA L0D5C
+ STA L0D5B
+
+.L11D1
+
+ LDA #&FF
+ STA L0F14
+
+ LDA #&7B
+ JMP MA34
+
+.L11DB
+
+ AND #7                 \ Calculate MCNT mod 8, jumping to MA22 if it is
+ BNE MA22               \ non-zero (so the following code only runs every 8
+                        \ iterations of the main loop)
 
                         \ --- End of replacement ------------------------------>
 
@@ -4956,7 +4982,7 @@ ENDMACRO
 
 .MA22
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA MJ                 \ If we are in witchspace, jump down to MA23 to skip
 \BNE MA23               \ the following, as there are no planets or suns to
@@ -4996,7 +5022,7 @@ ENDMACRO
  JSR m                  \ Call m to calculate the maximum distance to the
                         \ planet in any of the three axes, returned in A
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \BNE MA23               \ If A > 0 then we are a fair distance away from the
 \                       \ planet in at least one axis, so jump to MA23 to skip
@@ -5063,7 +5089,7 @@ ENDMACRO
  LDA Q                  \ Store the result in ALTIT, our altitude
  STA ALTIT
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \BNE MA23               \ If our altitude is non-zero then we haven't crashed,
 \                       \ so jump to MA23 to skip to the next section
@@ -5084,7 +5110,7 @@ ENDMACRO
 
 .MA29
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \CMP #20                \ If this is the 20th iteration in this block of 32,
 \BNE MA23               \ do the following, otherwise jump to MA23 to skip the
@@ -5197,8 +5223,20 @@ ENDMACRO
 
  STA QQ14               \ Store the updated fuel level in QQ14
 
- LDA #160               \ Print recursive token 0 ("FUEL SCOOPS ON") as an
- JSR MESS               \ in-flight message
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
+
+\LDA #160               \ Print recursive token 0 ("FUEL SCOOPS ON") as an
+\JSR MESS               \ in-flight message
+
+                        \ --- And replaced by: -------------------------------->
+
+ LDA #160               \ Set A to token 160 ("FUEL SCOOPS ON")
+
+.MA34
+
+ JSR MESS               \ Print the token in A as an in-flight message
+
+                        \ --- End of replacement ------------------------------>
 
 \ ******************************************************************************
 \
@@ -5284,7 +5322,7 @@ ENDMACRO
  BNE MA9                \ then jump to MA9 to return from the main flight loop
                         \ (as MA9 is an RTS)
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \JMP STARS              \ This is a space view, so jump to the STARS routine to
 \                       \ process the stardust, and return from the main flight
@@ -7200,7 +7238,7 @@ ENDMACRO
 
 .NA%
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \EQUS "JAMESON"         \ The current commander name, which defaults to JAMESON
 \EQUB 13                \
@@ -7241,7 +7279,7 @@ ENDMACRO
  EQUW &0248             \ QQ21 = Seed s1 for system 0, galaxy 0 (Tibedied), #5-6
  EQUW &B753             \ QQ21 = Seed s2 for system 0, galaxy 0 (Tibedied), #7-8
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \IF Q%
 \EQUD &00CA9A3B         \ CASH = Amount of cash (100,000,000 Cr), #9-12
@@ -7263,7 +7301,7 @@ ENDMACRO
 
  EQUB 0                 \ GCNT = Galaxy number, 0-7, #15
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \EQUB POW+(128 AND Q%)  \ LASER = Front laser, #16
 \
@@ -7311,7 +7349,7 @@ ENDMACRO
 
  EQUB Q% AND 127        \ BOMB = Energy bomb, #42
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \EQUB Q% AND 1          \ ENGY = Energy/shield level, #43
 
@@ -7379,7 +7417,7 @@ ENDMACRO
 
 .CHK2
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \EQUB &03 EOR &A9       \ The checksum value for the default commander, EOR'd
 \                       \ with &A9 to make it harder to tamper with the checksum
@@ -7414,7 +7452,7 @@ ENDMACRO
 
 .CHK
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \EQUB &03               \ The checksum value for the default commander, #75
 
@@ -9221,7 +9259,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.FLIP
 \
@@ -9273,7 +9311,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.STARS
 \
@@ -9698,7 +9736,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.STARS6
 \
@@ -12146,58 +12184,116 @@ ENDMACRO
                         \ handler (this BMI is effectively a JMP as we didn't
                         \ loop back with the BPL above, so BMI is always true)
 
-.L2049
+\ ******************************************************************************
+\
+\       Name: sub_C2049
+\       Type: Subroutine
+\   Category: Demo
+\    Summary: xxx
+\
+\ ******************************************************************************
+
+.sub_C2049
+
  TAX                    \ ???
- LDA #$03
- STA $AA
- LDA #$02
- STA $AB
- LDA #$14
- STA $A5
- LDA $17E8,X
- STA $22
- LDA $17E9,X
- STA $23
- LDY #$08
+
+ LDA #3
+ STA RAT
+
+ LDA #2
+ STA RAT2
+
+ LDA #20
+ STA CNT2
+
+ LDA UNIV,X
+ STA V
+
+ LDA UNIV+1,X
+ STA V+1
+
+ LDY #8
+
 .L2062
- LDA ($22),Y
- STA $00D2,Y
+
+ LDA (V),Y
+ STA K3,Y
+
  DEY
+
  BPL L2062
- JSR $462D
- JSR $22C3
- LDA $33
+
+ JSR TAS2
+
+ JSR sub_C22C3
+
+ LDA X2
  ASL A
- CMP #$C0
+ CMP #192
  BCC L208C
- LDA $0F14
- STA $48
- JSR $23CB
- JSR L208D
+
+ LDA L0F14
+ STA KY7
+
+ JSR sub_C23CB
+
+ JSR sub_C208D
+
  BCS L208C
- LDA $32
+
+ LDA Y1
  ASL A
- LDA #$02
+ LDA #2
  ROR A
- STA $71
+ STA INWK+30
+
 .L208C
+
  RTS
-.L208D
- LDX #$00
- STX $AB
- STX $71
- EOR $31
- EOR $32
+
+\ ******************************************************************************
+\
+\       Name: sub_C208D
+\       Type: Subroutine
+\   Category: Demo
+\    Summary: xxx
+\
+\ ******************************************************************************
+
+.sub_C208D
+
+ LDX #0                 \ ???
+ STX RAT2
+
+ STX INWK+30
+
+ EOR X1
+ EOR Y1
  ASL A
- LDA #$02
+ LDA #2
  ROR A
- STA $70
- LDA $31
+ STA INWK+29
+
+ LDA X1
  ASL A
- CMP #$0C
+ CMP #12
+
  RTS
- JSR $461E
- JMP $22C3
+
+\ ******************************************************************************
+\
+\       Name: sub_C20A3
+\       Type: Subroutine
+\   Category: Demo
+\    Summary: xxx
+\
+\ ******************************************************************************
+
+.sub_C20A3
+
+ JSR SPS1               \ ???
+
+ JMP sub_C22C3
 
 \ ******************************************************************************
 \
@@ -12214,7 +12310,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.ESCAPE
 \
@@ -12538,7 +12634,7 @@ ENDMACRO
 
 .TACTICS
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
  LDA #3                 \ Set RAT = 3, which is the magnitude we set the pitch
  STA RAT                \ or roll counter to in part 7 when turning a ship
@@ -12841,7 +12937,7 @@ ENDMACRO
 
 .TA16
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \JMP SFRMIS             \ Jump to SFRMIS to spawn a missile as a child of the
 \                       \ current ship, make a noise and print a message warning
@@ -12855,10 +12951,13 @@ ENDMACRO
                         \ of incoming missiles
 
  BCC L2208              \ ???
- LDA $0F13
- STA $0D5B
+
+ LDA L0F13
+ STA L0D5B
+
 .L2208
- RTS
+
+ RTS                    \ Return from the subroutine
 
                         \ --- End of replacement ------------------------------>
 
@@ -12947,7 +13046,7 @@ ENDMACRO
 
  DEC INWK+28            \ Halve the attacking ship's acceleration in byte #28
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA ECMA               \ If an E.C.M. is currently active (either ours or an
 \BNE TA10               \ opponent's), return from the subroutine without making
@@ -12955,18 +13054,27 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- LDA ECMA               \ ???
+ LDA ECMA               \ If no E.C.M. is currently active, jump to L2231
  BEQ L2231
- RTS
+
+ RTS                    \ If we get here then an E.C.M. is currently active
+                        \ (either ours or an opponent's), so return from the
+                        \ subroutine without making the laser-strike sound
+
 .L2231
- LDA $93
- STA $0D5C
- LDA $0D5B
+
+ LDA XSAV               \ ???
+ STA L0D5C
+
+ LDA L0D5B
  BNE L2245
- LDA $93
- STA $0D5B
- LDA #$23
- JSR $4737
+
+ LDA XSAV
+ STA L0D5B
+
+ LDA #&23               \ "T"
+ JSR sub_C4737
+
 .L2245
 
                         \ --- End of replacement ------------------------------>
@@ -13058,7 +13166,7 @@ ENDMACRO
                         \ here, but we also get here if the ship is either far
                         \ away and aggressive, or not too close
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA XX15               \ Reverse the signs of XX15 and the dot product in CNT,
 \EOR #%10000000         \ starting with the x-coordinate
@@ -13071,16 +13179,24 @@ ENDMACRO
 \LDA XX15+2             \ And then the z-coordinate, so now the XX15 vector goes
 \EOR #%10000000         \ from the enemy ship to our ship (it was previously the
 \STA XX15+2             \ other way round)
+\
+\LDA CNT                \ And finally change the sign of the dot product in CNT,
+\EOR #%10000000         \ so now it's positive if the ships are facing each
+\STA CNT                \ other, and negative if they are facing the same way
 
                         \ --- And replaced by: -------------------------------->
 
- JSR $23CB              \ ???
-
-                        \ --- End of replacement ------------------------------>
+ JSR sub_C23CB          \ ???
 
  LDA CNT                \ And finally change the sign of the dot product in CNT,
  EOR #%10000000         \ so now it's positive if the ships are facing each
- STA CNT                \ other, and negative if they are facing the same way
+                        \ other
+
+.L2268
+
+ STA CNT                \ And update the value of CNT
+
+                        \ --- End of replacement ------------------------------>
 
 .TA15
 
@@ -13114,7 +13230,7 @@ ENDMACRO
                         \ other words if the ship should pull up to head in the
                         \ direction of XX15
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \EOR #%10000000         \ Set the ship's pitch counter to 3, with the opposite
 \AND #%10000000         \ sign to the dot product result, which gently pitches
@@ -13157,7 +13273,7 @@ ENDMACRO
                         \ ship, in other words if the ship should roll right to
                         \ head in the direction of XX15
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \EOR INWK+30            \ Set the ship's roll counter to 5, with the sign set to
 \AND #%10000000         \ positive (clockwise roll) if the pitch counter and dot
@@ -13192,7 +13308,7 @@ ENDMACRO
  BMI TA9                \ TA9, as the ships are facing away from each other and
                         \ the ship might want to slow down to take another shot
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \CMP #22                \ The dot product is positive, so the ships are facing
 \BCC TA9                \ each other. If A < 22 then the ships are not heading
@@ -13239,107 +13355,200 @@ ENDMACRO
 
  RTS                    \ Return from the subroutine
 
-.L22C3
- LDY #$0A               \ ???
- JSR $274F
- CMP #$98
+\ ******************************************************************************
+\
+\       Name: sub_C22C3
+\       Type: Subroutine
+\   Category: Demo
+\    Summary: xxx
+\
+\ ******************************************************************************
+
+.sub_C22C3
+
+ LDY #10                \ ???
+
+ JSR TAS3
+
+ CMP #152
  BCC L22D0
- LDX #$00
- STX $AB
+
+ LDX #0
+ STX RAT2
+
 .L22D0
- JMP $2268
- LDA #$06
- STA $AB
+
+ JMP L2268              \ Set CNT then TA15
+
+\ ******************************************************************************
+\
+\       Name: sub_C22D3
+\       Type: Subroutine
+\   Category: Demo
+\    Summary: xxx
+\
+\ ******************************************************************************
+
+.sub_C22D3
+
+ LDA #6                 \ ???
+ STA RAT2
+
  LSR A
- STA $AA
- LDA #$1D
- STA $A5
- LDA $0D55
+ STA RAT
+
+ LDA #29
+ STA CNT2
+
+ LDA SSPR
  BNE L22E6
+
 .L22E3
- JMP $20A3
+
+ JMP sub_C20A3
+
 .L22E6
- JSR L2371
- LDA $D4
- ORA $D7
- ORA $DA
- AND #$7F
+
+ JSR sub_C2371
+
+ LDA XX2+2
+ ORA XX2+5
+ ORA XX2+8
+ AND #%01111111
+
  BNE L22E3
- JSR $4650
- LDA $90
- STA $3D
- JSR $462D
- LDY #$0A
- JSR $23A9
+
+ JSR TA2
+
+ LDA Q
+ STA K
+
+ JSR TAS2
+
+ LDY #10
+ JSR sub_C23A9
+
  BMI L2327
- CMP #$23
+
+ CMP #35
  BCC L2327
- LDY #$0A
- JSR $274F
- CMP #$A2
+
+ LDY #10
+ JSR TAS3
+
+ CMP #162
  BCS L2341
- LDA $3D
- CMP #$9D
+
+ LDA K
+ CMP #157
  BCC L2319
+
  BCS L2341
+
 .L2319
- JSR $23CB
- JSR L22C3
+
+ JSR sub_C23CB
+
+ JSR sub_C22C3
+
 .L231F
- LDX #$00
- STX $6F
+
+ LDX #0
+ STX INWK+28
+
  INX
- STX $6E
+ STX INWK+27
+
  RTS
+
 .L2327
- JSR L2371
- JSR $23DE
- JSR $23DE
- JSR $462D
- JSR $23CB
- JMP L22C3
+
+ JSR sub_C2371
+
+ JSR sub_C23DE
+
+ JSR sub_C23DE
+
+ JSR TAS2
+
+ JSR sub_C23CB
+
+ JMP sub_C22C3
+
 .L2339
- INC $6F
- LDA #$7F
- STA $70
+
+ INC INWK+28
+
+ LDA #127
+ STA INWK+29
+
  BNE L2370
+
 .L2341
- JSR $208D
+
+ JSR sub_C208D
+
  BCS L231F
- LDA $32
+
+ LDA Y1
  ASL A
- LDA #$02
+
+ LDA #2
  ROR A
- STA $71
- LDA $32
+ STA INWK+30
+
+ LDA Y1
  ASL A
- CMP #$0C
+ CMP #12
  BCS L231F
- STX $70
- LDA $69
- STA $31
- LDA $6B
- STA $32
- LDA $6D
- STA $33
- LDY #$10
- JSR $23A9
+
+ STX INWK+29
+
+ LDA INWK+22
+ STA X1
+
+ LDA INWK+24
+ STA Y1
+
+ LDA INWK+26
+ STA X2
+
+ LDY #16
+ JSR sub_C23A9
+
  ASL A
- CMP #$42
+ CMP #66
  BCS L2339
+
  JSR L231F
+
 .L2370
+
  RTS
-.L2371
- LDA #$24
- STA $22
- LDA #$09
- STA $23
- LDY #$02
- JSR $2385
- LDY #$05
- JSR $2385
- LDY #$08
+
+\ ******************************************************************************
+\
+\       Name: sub_C2371
+\       Type: Subroutine
+\   Category: Demo
+\    Summary: xxx
+\
+\ ******************************************************************************
+
+.sub_C2371
+
+ LDA #LO(K%+NI%)        \ ???
+ STA V
+ LDA #HI(K%+NI%)
+ STA V+1
+
+ LDY #2
+ JSR TAS1
+
+ LDY #5
+ JSR TAS1
+
+ LDY #8
 
 \ ******************************************************************************
 \
@@ -13420,75 +13629,140 @@ ENDMACRO
 
  RTS                    \ Return from the subroutine
 
- LDX $0924,Y            \ ???
- STX $90
- LDA $31
- JSR $2745
- LDX $0926,Y
- STX $90
- LDA $32
- JSR $276B
- STA $92
- STX $91
- LDX $0928,Y
- STX $90
- LDA $33
- JMP $276B
- LDA $31
- EOR #$80
- STA $31
- LDA $32
- EOR #$80
- STA $32
- LDA $33
- EOR #$80
- STA $33
+\ ******************************************************************************
+\
+\       Name: sub_C23A9
+\       Type: Subroutine
+\   Category: Demo
+\    Summary: xxx
+\
+\ ******************************************************************************
+
+.sub_C23A9
+
+ LDX K%+NI%,Y           \ ???
+ STX Q
+
+ LDA X1
+ JSR MULT12
+
+ LDX K%+NI%+2,Y
+ STX Q
+
+ LDA Y1
+
+ JSR MAD
+
+ STA S
+ STX R
+
+ LDX K%+NI%+4,Y
+ STX Q
+
+ LDA X2
+ JMP MAD
+
+\ ******************************************************************************
+\
+\       Name: sub_C23CB
+\       Type: Subroutine
+\   Category: Demo
+\    Summary: xxx
+\
+\ ******************************************************************************
+
+.sub_C23CB
+
+ LDA X1                 \ ???
+ EOR #%10000000
+ STA X1
+
+ LDA Y1
+ EOR #%10000000
+ STA Y1
+
+ LDA X2
+ EOR #%10000000
+ STA X2
+
  RTS
- JSR L23E1
+
+\ ******************************************************************************
+\
+\       Name: sub_C23DE
+\       Type: Subroutine
+\   Category: Demo
+\    Summary: xxx
+\
+\ ******************************************************************************
+
+.sub_C23DE
+
+ JSR L23E1              \ ???
+
 .L23E1
- LDA $092E
- LDX #$00
+
+ LDA K%+NI%+10
+ LDX #0
  JSR L23F6
- LDA $0930
- LDX #$03
+
+ LDA K%+NI%+12
+ LDX #3
  JSR L23F6
- LDA $0932
- LDX #$06
+
+ LDA K%+NI%+14
+ LDX #6
+
 .L23F6
+
  ASL A
- STA $91
- LDA #$00
+ STA R
+ LDA #0
  ROR A
- EOR #$80
- EOR $D4,X
+
+ EOR #%10000000
+ EOR XX2+2,X
  BMI L240D
- LDA $91
- ADC $D2,X
- STA $D2,X
+
+ LDA R
+ ADC XX2,X
+ STA XX2,X
+
  BCC L240C
- INC $D3,X
+
+ INC XX2+1,X
+
 .L240C
+
  RTS
+
 .L240D
- LDA $D2,X
+
+ LDA K3,X
  SEC
- SBC $91
- STA $D2,X
- LDA $D3,X
- SBC #$00
- STA $D3,X
+ SBC R
+ STA K3,X
+
+ LDA K3+1,X
+ SBC #0
+ STA K3+1,X
+
  BCS L240C
- LDA $D2,X
- EOR #$FF
- ADC #$01
- STA $D2,X
- LDA $D3,X
- EOR #$FF
- ADC #$00
- STA $D3,X
- LDA $D4,X
- EOR #$80
- STA $D4,X
+
+ LDA K3,X
+ EOR #&FF
+ ADC #1
+ STA K3,X
+
+ LDA K3+1,X
+ EOR #&FF
+ ADC #0
+ STA K3+1,X
+
+ LDA K3+2,X
+ EOR #%10000000
+ STA K3+2,X
+
  JMP L240C
 
 \ ******************************************************************************
@@ -14312,7 +14586,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.STARS2
 \
@@ -16350,7 +16624,7 @@ ENDMACRO
 
 .cntr
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA DAMP               \ If DAMP is non-zero, then keyboard damping is not
 \BNE RE1                \ enabled, so jump to RE1 to return from the subroutine
@@ -16511,13 +16785,13 @@ ENDMACRO
 
                         \ Jumps to RE3+2 end up here
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \                       \ If we get here, then we need to apply auto-recentre,
 \                       \ if it is configured
 \
-\LDA DJD                \ If keyboard auto-recentre is disabled, then
-\BNE RE2+2              \ jump to RE2+2 to restore A and return
+\LDA DJD                \ If keyboard auto-recentre is disabled, then jump to
+\BNE RE2+2              \ RE2+2 to restore A and return
 
                         \ --- End of removed code ----------------------------->
 
@@ -16745,7 +17019,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.WARP
 \
@@ -16990,7 +17264,7 @@ ENDMACRO
 
 .LASLI2
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA QQ11               \ If this is not a space view (i.e. QQ11 is non-zero)
 \BNE PU1-1              \ then jump to MA9 to return from the main flight loop
@@ -17072,7 +17346,7 @@ ENDMACRO
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.PLUT
 \
@@ -17256,7 +17530,7 @@ ENDMACRO
  LDY QQ11               \ If the current view is not a space view, jump up to LQ
  BNE LQ                 \ to set up a new space view
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \CPX VIEW               \ If the current view is already of type X, jump to LO2
 \BEQ LO2                \ to return from the subroutine (as LO2 contains an RTS)
@@ -17445,7 +17719,7 @@ ENDIF
  LDY #11                \ Move the text cursor to row 11
  STY XC
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA VIEW               \ Load the current view into A:
 \                       \
@@ -17576,15 +17850,18 @@ ENDIF
  BNE DELAY              \ If Y isn't yet at zero, jump back to DELAY to wait
                         \ for another vertical sync
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
  PHA                    \ ???
  TXA
  PHA
- JSR $4861
+
+ JSR sub_C4861
+
  PLA
  TAX
  PLA
+
  LDY #0
 
                         \ --- End of added code ------------------------------->
@@ -18831,7 +19108,7 @@ ENDIF
 
  JSR TT162              \ Print a space
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA #'k'               \ Print "km", returning from the subroutine using a
 \JSR TT26               \ tail call
@@ -18847,7 +19124,7 @@ ENDIF
 
 .L2C67
 
- LDY #&FF               \ ???
+ LDY #255               \ ???
  JMP DELAY
 
                         \ --- End of replacement ------------------------------>
@@ -19532,7 +19809,7 @@ ENDIF
 
 .BAY2
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA #f9                \ Jump into the main loop at FRCE, setting the key
 \JMP FRCE               \ "pressed" to red key f9 (so we show the Inventory
@@ -19541,28 +19818,41 @@ ENDIF
                         \ --- And replaced by: -------------------------------->
 
  LDA #f9                \ ???
- JSR $43D2
+ JSR TT102
+
 .L2E78
- JSR $2CDF
- JSR $2FD4
- JSR $428F
- STA $0F36
- JSR $428F
- STA $0F37
- JSR $2FD4
- LDA #$32
- JSR $43D2
- LDY #$63
- JSR $29F5
- JSR $2B64
- JSR $428F
- CMP #$B4
+
+ JSR TT22
+
+ JSR TT103
+
+ JSR DORND
+ STA QQ9
+
+ JSR DORND
+ STA QQ10
+
+ JSR TT103
+
+ LDA #&32
+ JSR TT102
+
+ LDY #99
+ JSR DELAY
+
+ JSR TT25
+
+ JSR DORND
+ CMP #180
  BCC L2E78
- LDA #$76
- JSR $43D2
- JSR $408A
- LDA #$20
- JMP $43BB
+
+ LDA #f8
+ JSR TT102
+
+ JSR ping
+
+ LDA #f0
+ JMP FRCE
 
                         \ --- End of replacement ------------------------------>
 
@@ -19603,7 +19893,7 @@ ENDIF
 
 .gnum
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDX #0                 \ We will build the number entered in R, so initialise
 \STX R                  \ it with 0
@@ -19669,22 +19959,33 @@ ENDIF
                         \ --- And replaced by: -------------------------------->
 
  JSR DORND              \ ???
- CPX #$A0
- AND #$07
+
+ CPX #160
+ AND #7
+
  BCC L2EB9
- LDA #$00
+
+ LDA #0
+
 .L2EB9
- AND $0F1E
- STA $91
+
+ AND QQ25
+ STA R
+
  BEQ L2EC6
+
  CLC
- ADC #$30
+ ADC #48
  JSR TT26
+
 .L2EC6
- LDY #$32
+
+ LDY #50
  JSR DELAY
- LDA $91
- CMP $0F1E
+
+ LDA R
+
+ CMP QQ25
 
                         \ --- End of replacement ------------------------------>
 
@@ -19867,7 +20168,7 @@ ENDIF
  JMP BAY2               \ And then jump to BAY2 to display the Inventory
                         \ screen, as we have finished selling cargo
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \RTS                    \ Return from the subroutine
 
@@ -21581,7 +21882,7 @@ ENDIF
  CMP #17                \ last item
  BCC TT168
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \RTS                    \ Return from the subroutine
 
@@ -21903,7 +22204,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.ptg
 \
@@ -21992,7 +22293,7 @@ ENDIF
 
 .ee5
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \JSR CTRL               \ Scan the keyboard to see if CTRL is currently pressed,
 \                       \ returning a negative value in A if it is
@@ -22108,13 +22409,14 @@ ENDIF
 
  STA FIST               \ Update our legal status with the new value
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
  LDX #0                 \ Set QQ12 to 0 to indicate we are not docked
  STX QQ12
 
  JSR LOOK1              \ ???
- LDA #$74
+
+ LDA #&74
  JMP FRCE
 
                         \ --- End of added code ------------------------------->
@@ -22335,7 +22637,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.bay
 \
@@ -22375,9 +22677,9 @@ ENDIF
  LDA #12
 
  STA Q                  \ Set QQ25 = A (so QQ25 is in the range 3-12 and
- STA QQ25               \ represents number of the most advanced item available
- INC Q                  \ in this system, which we can pass to gnum below when
-                        \ asking which item we want to buy)
+ STA QQ25               \ represents the number of the most advanced item
+ INC Q                  \ available in this system, which we can pass to gnum
+                        \ below when asking which item we want to buy)
                         \
                         \ Set Q = A + 1 (so Q is in the range 4-13 and contains
                         \ QQ25 + 1, i.e. the highest item number on sale + 1)
@@ -22394,7 +22696,7 @@ ENDIF
                         \ years of fuel would be 14.0 Cr, or a PRXS value of
                         \ 140)
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
  LDA #3                 \ ???
  STA QQ25
@@ -22451,7 +22753,7 @@ ENDIF
  LDA #127               \ Print recursive token 127 ("ITEM") followed by a
  JSR prq                \ question mark
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \JSR gnum               \ Call gnum to get a number from the keyboard, which
 \                       \ will be the number of the item we want to purchase,
@@ -22468,23 +22770,38 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- LDA $0333              \ ???
- CMP #$04
- LDA #$02
+ LDA NOMSL              \ ???
+ CMP #4
+
+ LDA #2
+
  BCC L34DB
- LDA $030D
- CMP #$46
- LDA #$01
+
+ LDA QQ14
+ CMP #70
+
+ LDA #1
+
  BCC L34DB
- JSR $2EAE
+
+ JSR gnum
+
 .L34DB
- STA $91
+
+ STA R
+
  BEQ L34E1
- BCC $34E9
+
+ BCC L34E9
+
 .L34E1
- JSR $2C67
- LDA #$71
- JMP $43D2
+
+ JSR L2C67
+
+ LDA #f1
+ JMP TT102
+
+.L34E9
 
                         \ --- End of replacement ------------------------------>
 
@@ -22691,7 +23008,7 @@ ENDIF
  JSR dn2                \ Call dn2 to make a short, high beep and delay for 1
                         \ second
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \JMP BAY                \ Jump to BAY to go to the docking bay (i.e. show the
 \                       \ Status Mode screen)
@@ -24455,10 +24772,10 @@ ENDIF
 
 .SOLAR
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #$FF               \ ???
- STA $0D5D
+ LDA #&FF               \ ???
+ STA L0D5D
 
                         \ --- End of added code ------------------------------->
 
@@ -25537,9 +25854,9 @@ ENDIF
                         \ when we are done, copying the block from INWK into
                         \ the K% workspace (specifically, to INF)
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- STX $0F13              \ ???
+ STX L0F13              \ ???
 
                         \ --- End of added code ------------------------------->
 
@@ -28594,7 +28911,7 @@ ENDIF
                         \ (or the equivalent on joystick) and update the key
                         \ logger, setting KL to the key pressed
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA JSTK               \ If the joystick is not configured, jump down to TJ1,
 \BEQ TJ1                \ otherwise we move the cursor with the joystick
@@ -28655,7 +28972,7 @@ ENDIF
 
 .TJ1
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA KL                 \ Set A to the value of KL (the key pressed)
 \
@@ -28683,31 +29000,45 @@ ENDIF
  LDX #0                 \ Set the initial values for the results, X = Y = 0,
  LDY #0                 \ which we now increase or decrease appropriately
 
- LDA $96                \ ???
- CMP #$80
+ LDA QQ11               \ ???
+ CMP #128
  BNE L4087
- LDA $2F
+
+ LDA QQ22+1
  BEQ L4072
- LDY #$3C
- JSR $29F5
- LDA #$20
- STA $41
+
+ LDY #60
+ JSR DELAY
+
+ LDA #&20
+ STA KL
+
  RTS
+
 .L4072
+
  DEX
- LDA $0F37
- CMP #$B5
+
+ LDA QQ10
+ CMP #181
  BEQ L407B
+
  DEY
+
 .L407B
- LDA $0F36
- CMP #$03
+
+ LDA QQ9
+ CMP #3
  BNE L4087
+
  INX
- LDA #$54
- STA $41
+
+ LDA #&54
+ STA KL
+
 .L4087
- LDA $41
+
+ LDA KL
 
                         \ --- End of replacement ------------------------------>
 
@@ -29039,15 +29370,19 @@ ENDIF
 
 .KS5
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA $0D5B              \ ???
- CMP $A7
- BNE $411C
- LDY #$00
- STY $0D5B
+ LDA L0D5B              \ ???
+ CMP XX4
+ BNE L411C
+
+ LDY #0
+ STY L0D5B
+
  DEY
- STY $0F14
+ STY L0F14
+
+.L411C
 
                         \ --- End of added code ------------------------------->
 
@@ -29135,7 +29470,7 @@ ENDIF
  LDA FRIN,X             \ Copy the contents of the source slot into the
  STA FRIN-1,X           \ destination slot
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \BEQ KS2                \ If the slot we just shuffled down contains 0, then
 \                       \ the source slot is empty and we are done shuffling,
@@ -29143,9 +29478,11 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- BNE L4148              \ ???
- JMP KS2
-.L4148
+ BNE P%+5               \ If the slot we just shuffled down is not empty, then
+                        \ skip the following instruction
+
+ JMP KS2                \ The source slot is empty and we are done shuffling,
+                        \ so jump to KS2 to move on to processing missiles
 
                         \ --- End of replacement ------------------------------>
 
@@ -29388,9 +29725,9 @@ ENDIF
                         \ slots for the local bubble of universe, and various
                         \ flight and ship status variables
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- STA $0D5D              \ ???
+ STA L0D5D              \ ???
 
                         \ --- End of added code ------------------------------->
 
@@ -30340,7 +30677,7 @@ ENDIF
 
 .TT102
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \CMP #f8                \ If red key f8 was pressed, jump to STATUS to show the
 \BNE P%+5               \ Status Mode screen, returning from the subroutine
@@ -30398,7 +30735,7 @@ ENDIF
  BNE P%+5               \ Buy Cargo screen, returning from the subroutine using
  JMP TT219              \ a tail call
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \CMP #&47               \ If "@" was pressed, jump to SVE to save the commander
 \BNE P%+5               \ file, returning from the subroutine using a tail call
@@ -30643,17 +30980,39 @@ ENDIF
 
 .FAROF2
 
- CMP INWK+1             \ If A < x_hi, C will be clear so jump to MA34 to
- BCC MA34               \ return from the subroutine with C clear, otherwise
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
+
+\CMP INWK+1             \ If A < x_hi, C will be clear so jump to MA34 to
+\BCC MA34               \ return from the subroutine with C clear, otherwise
+\                       \ C will be set so move on to the next one
+\
+\CMP INWK+4             \ If A < y_hi, C will be clear so jump to MA34 to
+\BCC MA34               \ return from the subroutine with C clear, otherwise
+\                       \ C will be set so move on to the next one
+
+                        \ --- And replaced by: -------------------------------->
+
+ CMP INWK+1             \ If A < x_hi, C will be clear so jump to FA1 to
+ BCC FA1                \ return from the subroutine with C clear, otherwise
                         \ C will be set so move on to the next one
 
- CMP INWK+4             \ If A < y_hi, C will be clear so jump to MA34 to
- BCC MA34               \ return from the subroutine with C clear, otherwise
+ CMP INWK+4             \ If A < y_hi, C will be clear so jump to FA1 to
+ BCC FA1                \ return from the subroutine with C clear, otherwise
                         \ C will be set so move on to the next one
+
+                        \ --- End of replacement ------------------------------>
 
  CMP INWK+7             \ If A < z_hi, C will be clear, otherwise C will be set
 
-.MA34
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
+
+\.MA34
+
+                        \ --- And replaced by: -------------------------------->
+
+.FA1
+
+                        \ --- End of replacement ------------------------------>
 
  RTS                    \ Return from the subroutine
 
@@ -30885,7 +31244,7 @@ ENDIF
  JSR TITLE              \ returning with the internal number of the key pressed
                         \ in A
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \CMP #&44               \ Did we press "Y"? If not, jump to QU5, otherwise
 \BNE QU5                \ continue on to load a new commander
@@ -30909,7 +31268,7 @@ ENDIF
 \
 \BCC QU5
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \JSR GTNME              \ We want to load a new commander, so we need to get
 \                       \ the commander name to load
@@ -30981,7 +31340,7 @@ ENDIF
                         \ If the commander check below fails, we keep jumping
                         \ back to here to crash the game with an infinite loop
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \JSR CHECK              \ Call the CHECK subroutine to calculate the checksum
 \                       \ for the current commander block at NA%+8 and put it
@@ -31080,20 +31439,25 @@ ENDIF
  LDA #&FF               \ Set QQ12 = &FF (the docked flag) to indicate that we
  STA QQ12               \ are docked
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
  LDA #f8                \ ???
- JSR $43D2
- LDA #$16
- JSR $43D2
- LDA #$75
- JSR $43D2
- LDA #$73
- JSR $43D2
- LDA #$20
- JMP $43BB
- LDA #$FF
- STA $9F
+ JSR TT102
+
+ LDA #f7
+ JSR TT102
+
+ LDA #f6
+ JSR TT102
+
+ LDA #f3
+ JSR TT102
+
+ LDA #f0
+ JMP FRCE
+
+ LDA #&FF
+ STA QQ12
 
                         \ --- End of added code ------------------------------->
 
@@ -31215,10 +31579,12 @@ ENDIF
 
 .TLL2
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #$FF               \ ???
- STA $99
+ LDA #255               \ ???
+ STA MCNT
+
+.L45D3
 
                         \ --- End of added code ------------------------------->
 
@@ -31247,7 +31613,7 @@ ENDIF
 
  DEC MCNT               \ Decrement the main loop counter
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDA VIA+&40            \ Read 6522 System VIA input register IRB (SHEILA &40)
 \
@@ -31278,7 +31644,7 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- BNE $45D3              \ ???
+ BNE L45D3              \ ???
 
                         \ --- End of replacement ------------------------------>
 
@@ -31308,7 +31674,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.CHECK
 \
@@ -31353,7 +31719,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.TRNME
 \
@@ -31386,7 +31752,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.TR1
 \
@@ -31431,7 +31797,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.GTNME
 \
@@ -31489,7 +31855,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.RLINE
 \
@@ -31626,7 +31992,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.SVE
 \
@@ -31753,7 +32119,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
 .SVE
 
@@ -31810,7 +32176,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.QUS1
 \
@@ -31839,7 +32205,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.LOD
 \
@@ -32223,7 +32589,7 @@ ENDIF
 
 .RDKEY
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \LDX #16                \ Start the scan with internal key number 16 ("Q")
 \
@@ -32648,10 +33014,21 @@ ENDIF
  EQUB &45               \ J         KYTB+14     In-system jump
  EQUB &52               \ C         KYTB+15     Docking computer
 
-.L4737
- ORA #$80               \ ???
- STA $41
- RTS
+\ ******************************************************************************
+\
+\       Name: sub_C4737
+\       Type: Subroutine
+\   Category: Demo
+\    Summary: xxx
+\
+\ ******************************************************************************
+
+.sub_C4737
+
+ ORA #%10000000         \ ???
+ STA KL
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -32885,7 +33262,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.DKS3
 \
@@ -33015,7 +33392,7 @@ ENDIF
 
  DEY                    \ Decrement the counter
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \BNE DKL3               \ And loop back for the next key, until we have just
 \                       \ cleared KL+1. We don't want to clear the first key
@@ -33035,17 +33412,6 @@ ENDIF
                         \ --- End of replacement ------------------------------>
 
  RTS                    \ Return from the subroutine
-
-.L47A2
-
- PHA                    \ ???
-
- JSR U%                 \ Call U% to clear the key logger
-
- PLA                    \ ???
- AND #$7F
- STA $41
- JMP $4849
 
 \ ******************************************************************************
 \
@@ -33075,9 +33441,26 @@ ENDIF
 \
 \ ******************************************************************************
 
+                        \ --- Mod: Code added for Demonstration Disc: --------->
+
+.L47A2
+
+ PHA                    \ ???
+
+ JSR U%                 \ Call U% to clear the key logger
+
+ PLA                    \ ???
+
+ AND #%01111111
+ STA KL
+
+ JMP DK2
+
+                        \ --- End of added code ------------------------------->
+
 .DOKEY
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \JSR U%                 \ Call U% to clear the key logger
 \
@@ -33103,70 +33486,121 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- LDA $41                \ ???
- BMI $47A2
- JSR $4797
- LDA $0D5D
+ LDA KL                 \ ???
+
+ BMI L47A2
+
+ JSR U%
+
+ LDA L0D5D
  BEQ L481D
- JSR $4231
- LDA #$60
- STA $61
- ORA #$80
- STA $69
- STA $9B
- LDA $8C
- STA $6E
- LDA $0D5B
+
+ JSR ZINF
+
+ LDA #&60               \ Set byte #14 (nosev_z_hi) to 1 (&60), so the launched
+ STA INWK+14            \ ship is pointing away from us
+
+ ORA #128               \ Set byte #22 (sidev_x_hi) to -1 (&D0), so the launched
+ STA INWK+22            \ ship has the same orientation as spawned ships, just
+                        \ pointing away from us (if we set sidev to +1 instead,
+                        \ this ship would be a mirror image of all the other
+                        \ ships, which are spawned with -1 in nosev and +1 in
+                        \ sidev)
+
+ STA TYPE               \ ???
+
+ LDA DELTA              \ Set byte #27 (speed) to DELTA, so ???
+ STA INWK+27
+
+ LDA L0D5B              \ ???
  BEQ L47D7
+
  ASL A
- JSR $2049
+ JSR sub_C2049
+
  JMP L47DA
+
 .L47D7
- JSR $22D3
+
+ JSR sub_C22D3
+
 .L47DA
- LDA $6E
- CMP #$20
+
+ LDA INWK+27
+ CMP #32
  BCC L47E2
- LDA #$20
+
+ LDA #32
+
 .L47E2
+
  STA DELTA
- LDA #$FF
- LDX #$00
- LDY $6F
+
+ LDA #&FF
+ LDX #0
+ LDY INWK+28
  BEQ L47F1
+
  BMI L47EF
+
  INX
+
 .L47EF
- STA $42,X
+
+ STA KY1,X
+
 .L47F1
- LDA #$80
- LDX #$00
- ASL $70
+
+ LDA #128
+ LDX #0
+
+ ASL INWK+29
  BEQ L480A
+
  BCC L47FC
+
  INX
+
 .L47FC
- BIT $70
+
+ BIT INWK+29
  BPL L4806
- LDA #$40
- STA $9C
- LDA #$00
-.L4806
- STA KY3,X
- LDA JSTX
-.L480A
+
+ LDA #64
  STA JSTX
- LDA #$80
- LDX #$00
- ASL $71
+
+ LDA #0
+
+.L4806
+
+ STA KY3,X
+
+ LDA JSTX
+
+.L480A
+
+ STA JSTX
+
+ LDA #%10000000
+ LDX #0
+
+ ASL INWK+30
  BEQ L481B
+
  BCS L4817
+
  INX
+
 .L4817
+
  STA KY5,X
+
  LDA JSTY
+
 .L481B
+
  STA JSTY
+
 .L481D
 
                         \ --- End of replacement ------------------------------>
@@ -33229,7 +33663,7 @@ ENDIF
 
 .DK4
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \JSR RDKEY              \ Scan the keyboard for a key press and return the
 \                       \ internal key number in A and X (or 0 for no key press)
@@ -33302,8 +33736,9 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- JSR $4861              \ ???
- LDX $41
+ JSR sub_C4861          \ ???
+
+ LDX KL
 
                         \ --- End of replacement ------------------------------>
 
@@ -33349,33 +33784,61 @@ ENDIF
 
  RTS                    \ Return from the subroutine
 
-.L4861
- LDX #$10               \ ???
- JSR $474B
+\ ******************************************************************************
+\
+\       Name: sub_C4861
+\       Type: Subroutine
+\   Category: Demo
+\    Summary: xxx
+\
+\ ******************************************************************************
+
+.sub_C4861
+
+ LDX #&10               \ ??? "Q"
+ JSR DKS4
+
  BPL L486D
- LDA #$FF
- STA $0F49
+
+ LDA #&FF
+ STA DNOIZ
+
 .L486D
- LDX #$51
- JSR $474B
+
+ LDX #&51               \ "S"
+ JSR DKS4
+
  BPL L4879
- LDA #$00
- STA $0F49
+
+ LDA #0
+ STA DNOIZ
+
 .L4879
- LDX #$70
- JSR $474B
+
+ LDX #&70               \ ESCAPE
+ JSR DKS4
+
  BPL L4883
- JMP $4526
+
+ JMP DEATH2
+
 .L4883
- LDX #$69
- JSR $474B
+
+ LDX #&69               \ COPY
+ JSR DKS4
+
  BPL L4891
+
 .L488A
- LDX #$59
- JSR $474B
+
+ LDX #&59               \ DELETE
+ JSR DKS4
+
  BPL L488A
+
 .L4891
- RTS
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -33409,7 +33872,7 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code removed for Elite Demo Disc: ---------->
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
 \.TT217
 \
@@ -33487,14 +33950,15 @@ ENDIF
 \
 \ ******************************************************************************
 
-                        \ --- Mod: Code added for Elite Demo Disc: ------------>
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
 .TT217
 
  STY YSAV               \ Store Y in temporary storage, so we can restore it
                         \ later
 
- LDA #$00               \ ???
+ LDA #0                 \ ???
+
  TXA
 
 .out
