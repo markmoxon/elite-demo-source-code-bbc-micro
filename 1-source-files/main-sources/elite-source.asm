@@ -31393,8 +31393,7 @@ ENDIF
 \       Name: BR1 (Part 2 of 2)
 \       Type: Subroutine
 \   Category: Start and end
-\    Summary: Show the "Press Fire or Space, Commander" screen and start the
-\             game
+\    Summary: Show the second title screen and start the game
 \
 \ ------------------------------------------------------------------------------
 \
@@ -31406,9 +31405,8 @@ ENDIF
                         \ them are targeted
 
  LDA #147               \ Call TITLE to show a rotating Mamba (#3) and token
- LDX #3                 \ 147 ("PRESS FIRE OR SPACE,COMMANDER.{crlf}{crlf}"),
- JSR TITLE              \ returning with the internal number of the key pressed
-                        \ in A
+ LDX #3                 \ 147 ("{all caps}BBC{sentence case} TAPE VERSION
+ JSR TITLE              \ DEMONSTRATION")
 
  JSR ping               \ Set the target system coordinates (QQ9, QQ10) to the
                         \ current system coordinates (QQ0, QQ1) we just loaded
@@ -32113,9 +32111,7 @@ ENDIF
 \       Name: SVE
 \       Type: Subroutine
 \   Category: Save and load
-\    Summary: Save the commander file
-\  Deep dive: Commander save files
-\             The competition code
+\    Summary: Remnants of the save routine
 \
 \ ******************************************************************************
 
@@ -33923,24 +33919,7 @@ ENDIF
 \       Name: TT217
 \       Type: Subroutine
 \   Category: Keyboard
-\    Summary: Scan the keyboard until a key is pressed
-\
-\ ------------------------------------------------------------------------------
-\
-\ Scan the keyboard until a key is pressed, and return the key's ASCII code.
-\ If, on entry, a key is already being held down, then wait until that key is
-\ released first (so this routine detects the first key down event following
-\ the subroutine call).
-\
-\ ------------------------------------------------------------------------------
-\
-\ Returns:
-\
-\   X                   The ASCII code of the key that was pressed
-\
-\   A                   Contains the same as X
-\
-\   Y                   Y is preserved
+\    Summary: A cut-down and broken version of the TT217 routine
 \
 \ ------------------------------------------------------------------------------
 \
