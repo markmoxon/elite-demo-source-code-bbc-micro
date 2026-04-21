@@ -18,7 +18,7 @@ See [my profile](https://github.com/markmoxon) for more repositories to explore.
 
 ![Screenshot of the Elite Demonstration Disc on the BBC Micro](https://elite.bbcelite.com/images/github/Elite-Demo.png)
 
-This repository contains source code for the demo version of Ian Bell and David Braben's classic game Elite on the BBC Micro, with every single line documented and (for the most part) explained. It has been reconstructed by hand from a disassembly of the original game binaries from the Acornsoft Elite Demonstration Disc.
+This repository contains source code for the demonstration version of Ian Bell and David Braben's classic game Elite on the BBC Micro, with every single line documented and (for the most part) explained. It has been reconstructed by hand from a disassembly of the original game binaries from the Acornsoft Elite Demonstration Disc.
 
 It is a companion to the [elite.bbcelite.com website](https://elite.bbcelite.com).
 
