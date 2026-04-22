@@ -2887,17 +2887,22 @@ ENDMACRO
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
-.L0D5B
+.targetShip
 
  SKIP 1                 \ ???
 
-.L0D5C
+.attackingShip
 
  SKIP 1                 \ ???
 
-.L0D5D
+.hyperspaceDone
 
- SKIP 1                 \ ???
+ SKIP 1                 \ A flag to indicate whether we have done the hyperspace
+                        \ jump to Riedquat
+                        \
+                        \   * 0 = not yet, we are still in Lave
+                        \
+                        \   * Non-zero = we have jumped to Riedquat
 
                         \ --- End of added code ------------------------------->
 
@@ -3099,13 +3104,21 @@ ENDMACRO
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
-.L0F13
+.launchedMissile
 
- SKIP 1                 \ ???
+ SKIP 1                 \ Gets set to the slot number of the most recently
+                        \ spawned ship, so that if an enemy has launched a
+                        \ missile at us, we can set our target to this slot
+                        \ number so we start hunting for the missile
 
-.L0F14
+.enableLasers
 
- SKIP 1                 \ ???
+ SKIP 1                 \ Determines whether our lasers are enabled, as they are
+                        \ disabled for a while when we get a missile lock
+                        \
+                        \   * 0 = lasers are disabled during a missile lock
+                        \
+                        \   * Non-zero = lasers are enabled
 
                         \ --- End of added code ------------------------------->
 
@@ -3744,8 +3757,9 @@ ENDMACRO
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #0               \ ???
- STA L0F14
+ LDA #0                 \ Zero enableLasers so we disable laser fire while we
+ STA enableLasers       \ have a missile lock, so we don't accidentally shoot
+                        \ our missile out of the sky
 
                         \ --- End of added code ------------------------------->
 
@@ -3831,7 +3845,9 @@ ENDMACRO
  AND DKCMP
  BEQ MA68
 
- STA L0D5D
+ STA hyperspaceDone     \ Set hyperspaceDone to a non-ero value to indicate that
+                        \ we have done the hyperspace jump to Riedquat and have
+                        \ arrived in the new system
 
                         \ --- End of replacement ------------------------------>
 
@@ -4514,7 +4530,7 @@ ENDMACRO
  BCC MA47
 
  LDA #101
- JSR sub_C4737
+ JSR PressKey
 
                         \ --- End of added code ------------------------------->
 
@@ -4540,7 +4556,7 @@ ENDMACRO
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
  LDA #0                 \ ???
- STA L0D5B
+ STA targetShip
 
                         \ --- End of added code ------------------------------->
 
@@ -4773,15 +4789,17 @@ ENDMACRO
  CMP #100
  BCS L11D1
 
- LDA L0D5C
- STA L0D5B
+ LDA attackingShip
+ STA targetShip
 
 .L11D1
 
- LDA #&FF
- STA L0F14
+ LDA #&FF               \ Set enableLasers to a non-zero value to enable laser
+ STA enableLasers       \ fire, which might have been disabled while we had a
+                        \ missile lock, so this ensures we don't disable lasers
+                        \ for too long
 
- LDA #&7B
+ LDA #123               \ Token 123 ???
  JMP MA34
 
 .L11DB
@@ -12232,8 +12250,10 @@ ENDMACRO
  CMP #192
  BCC L208C
 
- LDA L0F14
- STA KY7
+ LDA enableLasers       \ Set KY7 to enableLasers, which will "press" the laser
+ STA KY7                \ fire key if lasers are enabled (as enableLasers will
+                        \ be &FF if lasers are enabled, or 0 if they are
+                        \ disabled during a missile lock)
 
  JSR sub_C23CB
 
@@ -12950,10 +12970,12 @@ ENDMACRO
                         \ current ship, make a noise and print a message warning
                         \ of incoming missiles
 
- BCC L2208              \ ???
+ BCC L2208              \ If SFRMIS returns with the C flag clear, then the
+                        \ missile wasn't successfully spawned, so skip the
+                        \ following
 
- LDA L0F13
- STA L0D5B
+ LDA launchedMissile    \ Set our target to the missile we just spawned, so our
+ STA targetShip         \ ship will start hunting for the missile
 
 .L2208
 
@@ -13063,17 +13085,18 @@ ENDMACRO
 
 .L2231
 
- LDA XSAV               \ ???
- STA L0D5C
+ LDA XSAV               \ Set attackingShip to the slot number of the ship that
+ STA attackingShip      \ is attacking us (i.e. the ship that we are currently
+                        \ applying tactics to, and which is firing on us)
 
- LDA L0D5B
- BNE L2245
+ LDA targetShip         \ If we already have a target, jump to L2245 to skip the
+ BNE L2245              \ following
 
- LDA XSAV
- STA L0D5B
+ LDA XSAV               \ We don't currently have a target but a ship is firing
+ STA targetShip         \ on us, so set our target to the attacking ship
 
- LDA #&23               \ "T"
- JSR sub_C4737
+ LDA #&23               \ Call PressKey to "press" the "T" button to arm the
+ JSR PressKey           \ missiles
 
 .L2245
 
@@ -24774,8 +24797,9 @@ ENDIF
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #&FF               \ ???
- STA L0D5D
+ LDA #&FF               \ Set hyperspaceDone to a non-ero value to indicate that
+ STA hyperspaceDone     \ we have done the hyperspace jump to Riedquat and have
+                        \ arrived in the new system
 
                         \ --- End of added code ------------------------------->
 
@@ -25856,7 +25880,10 @@ ENDIF
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- STX L0F13              \ ???
+ STX launchedMissile    \ Store the new ship's slot in launchedMissile so that
+                        \ if this is an enemy launching a missile at us in the
+                        \ tactics routine, we can switch targets to start
+                        \ hunting down the missile
 
                         \ --- End of added code ------------------------------->
 
@@ -29372,15 +29399,19 @@ ENDIF
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA L0D5B              \ ???
- CMP XX4
- BNE L411C
+ LDA targetShip         \ If the slot number of the ship to remove in XX4 does
+ CMP XX4                \ not match our current target, jump to L411C to skip
+ BNE L411C              \ the following
 
- LDY #0
- STY L0D5B
+                        \ We just removed our target ship, so we need to remove
+                        \ it as our target
 
- DEY
- STY L0F14
+ LDY #0                 \ Clear our target so we no longer hunt for the target
+ STY targetShip         \ ship, as it has been lost
+
+ DEY                    \ Set enableLasers to a non-zero value (&FF) so we can
+ STY enableLasers       \ fire our lasers once again (in case they were disabled
+                        \ during a missile lock)
 
 .L411C
 
@@ -29727,7 +29758,9 @@ ENDIF
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- STA L0D5D              \ ???
+ STA hyperspaceDone     \ Zero hyperspaceDone to indicate that we haven't yet
+                        \ done the hyperspace jump to Riedquat and are therefore
+                        \ still in Lave
 
                         \ --- End of added code ------------------------------->
 
@@ -33012,17 +33045,27 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_C4737
+\       Name: PressKey
 \       Type: Subroutine
 \   Category: Demo
-\    Summary: xxx
+\    Summary: "Press" a key by populating the key logger directly
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The internal key number to be "pressed"
 \
 \ ******************************************************************************
 
-.sub_C4737
+.PressKey
 
- ORA #%10000000         \ ???
- STA KL
+ ORA #%10000000         \ Set bit 7 of the key that we need to "press", so that
+                        \ it registers as a key press when we add it to the key
+                        \ logger
+
+ STA KL                 \ Store the key press in the key logger to "press" the
+                        \ specified key
 
  RTS                    \ Return from the subroutine
 
@@ -33483,18 +33526,19 @@ ENDIF
                         \ --- And replaced by: -------------------------------->
 
  LDA KL                 \ ???
-
  BMI L47A2
 
- JSR U%
+ JSR U%                 \ Call U% to clear the key logger
 
- LDA L0D5D
- BEQ L481D
+ LDA hyperspaceDone     \ If hyperspaceDone = 0 then we have not yet done the
+ BEQ L481D              \ hyperspace jump to Riedquat and are still in Lave, so
+                        \ jump to L481D to skip the following so we only spawn
+                        \ ships in Riedquat
 
- JSR ZINF
+ JSR ZINF               \ Call ZINF to reset the INWK ship workspace
 
  LDA #&60               \ Set byte #14 (nosev_z_hi) to 1 (&60), so the launched
- STA INWK+14            \ ship is pointing away from us
+ STA INWK+14            \ ship is pointing away from us ???
 
  ORA #128               \ Set byte #22 (sidev_x_hi) to -1 (&D0), so the launched
  STA INWK+22            \ ship has the same orientation as spawned ships, just
@@ -33508,7 +33552,7 @@ ENDIF
  LDA DELTA              \ Set byte #27 (speed) to DELTA, so ???
  STA INWK+27
 
- LDA L0D5B              \ ???
+ LDA targetShip         \ ???
  BEQ L47D7
 
  ASL A
