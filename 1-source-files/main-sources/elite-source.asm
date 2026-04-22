@@ -4340,8 +4340,8 @@ ENDMACRO
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #&FF               \ ???
- STA PATG
+ LDA #&FF               \ Set the PATG configuration option to &FF so we show 
+ STA PATG               \ the author names on the title screen
 
                         \ --- End of added code ------------------------------->
 
@@ -4368,7 +4368,8 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- JMP DEATH2             \ ???
+ JMP DEATH2             \ Jump to DEATH2 to reset most of the game and restart
+                        \ from the title screen
 
                         \ --- End of replacement ------------------------------>
 
@@ -4530,12 +4531,13 @@ ENDMACRO
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- JSR DORND              \ ???
- CMP #100
- BCC MA47
+ JSR DORND              \ Set A and X to random numbers
 
- LDA #101
- JSR PressKey
+ CMP #100               \ If A < 100 (39% chance), skip the following two
+ BCC MA47               \ instructions
+
+ LDA #&65               \ Call PressKey to "press" the "M" button to fire the
+ JSR PressKey           \ missile (61% chance)
 
                         \ --- End of added code ------------------------------->
 
@@ -4804,8 +4806,9 @@ ENDMACRO
                         \ missile lock, so this ensures we don't disable lasers
                         \ for too long
 
- LDA #123               \ Token 123 ???
- JMP MA34
+ LDA #123               \ Jump to MA34 to print token 123 ("DEMONSTRATION") as
+ JMP MA34               \ an in-flight message and continue the main flight loop
+                        \ in part 16
 
 .main2
 
@@ -12248,7 +12251,7 @@ ENDMACRO
 
  JSR TAS2
 
- JSR sub_C22C3
+ JSR TA151
 
  LDA X2
  ASL A
@@ -12260,7 +12263,7 @@ ENDMACRO
                         \ be &FF if lasers are enabled, or 0 if they are
                         \ disabled during a missile lock)
 
- JSR sub_C23CB
+ JSR TAS6
 
  JSR sub_C208D
 
@@ -12318,7 +12321,7 @@ ENDMACRO
 
  JSR SPS1               \ ???
 
- JMP sub_C22C3
+ JMP TA151
 
 \ ******************************************************************************
 \
@@ -13214,15 +13217,16 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- JSR sub_C23CB          \ ???
+ JSR TAS6               \ Call TAS6 to negate the vector in XX15 so it points in
+                        \ the opposite direction
 
- LDA CNT                \ And finally change the sign of the dot product in CNT,
- EOR #%10000000         \ so now it's positive if the ships are facing each
-                        \ other
+ LDA CNT                \ Change the sign of the dot product in CNT, so now it's
+ EOR #%10000000         \ positive if the ships are facing each other, and
+                        \ negative if they are facing the same way
 
-.L2268
+.TA152
 
- STA CNT                \ And update the value of CNT
+ STA CNT                \ Update CNT with the new value in A
 
                         \ --- End of replacement ------------------------------>
 
@@ -13321,12 +13325,14 @@ ENDMACRO
 
  ASL A                  \ Shift A left to double it and drop the sign bit
 
- CMP RAT2               \ If A < RAT2, skip to TA6 (so if RAT2 = 0, we always
- BCC TA6                \ set the roll counter to RAT)
+ CMP RAT2               \ If A < RAT2, skip to TA12 (so if RAT2 = 0, we always
+ BCC TA12               \ set the roll counter to RAT)
 
  LDA RAT                \ Set the magnitude of the ship's roll counter to RAT
  ORA INWK+29            \ (we already set the sign above)
  STA INWK+29
+
+.TA12
 
                         \ --- End of replacement ------------------------------>
 
@@ -13383,30 +13389,39 @@ ENDMACRO
 
  RTS                    \ Return from the subroutine
 
-\ ******************************************************************************
-\
-\       Name: sub_C22C3
-\       Type: Subroutine
-\   Category: Demo
-\    Summary: xxx
-\
-\ ******************************************************************************
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
-.sub_C22C3
+.TA151
 
- LDY #10                \ ???
+                        \ This is called from part 3 with the vector to the
+                        \ planet in XX15, when we want the ship to turn towards
+                        \ the planet. It does the same dot product calculation
+                        \ as part 3, but it can also change the value of RAT2
+                        \ so that roll and pitch is always applied
 
- JSR TAS3
+ LDY #10                \ Set (A X) = nosev . XX15
+ JSR TAS3               \
+                        \ The bigger the value of the dot product, the more
+                        \ aligned the two vectors are, with a maximum magnitude
+                        \ in A of 36 (96 * 96 >> 8). If A is positive, the
+                        \ vectors are facing in a similar direction, if it's
+                        \ negative they are facing in opposite directions
 
- CMP #152
- BCC L22D0
+ CMP #&98               \ If A is positive or A <= -24, jump to ttt
+ BCC ttt
 
- LDX #0
- STX RAT2
+ LDX #0                 \ A > -24, which means the vectors are facing in
+ STX RAT2               \ opposite directions but are quite aligned, so set
+                        \ RAT2 = 0 instead of the default value of 4, so we
+                        \ always apply roll and pitch when we turn the ship
+                        \ towards the planet
 
-.L22D0
+.ttt
 
- JMP L2268              \ Set CNT then TA15
+ JMP TA152              \ Jump to TA152 to store A in CNT and move the ship in
+                        \ the direction of XX15
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -13475,9 +13490,9 @@ ENDMACRO
 
 .L2319
 
- JSR sub_C23CB
+ JSR TAS6
 
- JSR sub_C22C3
+ JSR TA151
 
 .L231F
 
@@ -13499,9 +13514,9 @@ ENDMACRO
 
  JSR TAS2
 
- JSR sub_C23CB
+ JSR TAS6
 
- JMP sub_C22C3
+ JMP TA151
 
 .L2339
 
@@ -13692,28 +13707,28 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: sub_C23CB
+\       Name: TAS6
 \       Type: Subroutine
-\   Category: Demo
-\    Summary: xxx
+\   Category: Maths (Geometry)
+\    Summary: Negate the vector in XX15 so it points in the opposite direction
 \
 \ ******************************************************************************
 
-.sub_C23CB
+.TAS6
 
- LDA X1                 \ ???
+ LDA XX15               \ Reverse the sign of the x-coordinate of the vector in
+ EOR #%10000000         \ XX15
+ STA XX15
+
+ LDA XX15+1             \ Then reverse the sign of the y-coordinate
  EOR #%10000000
- STA X1
+ STA XX15+1
 
- LDA Y1
- EOR #%10000000
- STA Y1
+ LDA XX15+2             \ And then the z-coordinate, so now the XX15 vector is
+ EOR #%10000000         \ pointing in the opposite direction
+ STA XX15+2
 
- LDA X2
- EOR #%10000000
- STA X2
-
- RTS
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
@@ -19152,12 +19167,30 @@ ENDIF
  LDA #'m'
  JSR TT26
 
-.L2C67
-
- LDY #255               \ ???
- JMP DELAY
+                        \ Fall through into DelayFiveSeconds to delay for five
+                        \ seconds before returning from the subroutine (so when
+                        \ we show the Data on System screen, we show it for five
+                        \ seconds)
 
                         \ --- End of replacement ------------------------------>
+
+\ ******************************************************************************
+\
+\       Name: DelayFiveSeconds
+\       Type: Subroutine
+\   Category: Utility routines
+\    Summary: Wait for 5.1 seconds
+\
+\ ******************************************************************************
+
+                        \ --- Mod: Code added for Demonstration Disc: --------->
+
+.DelayFiveSeconds
+
+ LDY #255               \ Wait for 255/50 of a second (5.1 seconds) and return
+ JMP DELAY              \ from the subroutine using a tail call
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -19988,34 +20021,48 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- JSR DORND              \ ???
+                        \ Instead of waiting for the player to choose a menu
+                        \ item, we now choose a random menu item instead,
+                        \ returning a value in R in the range 0 to QQ25, with 0
+                        \ denoting that we are not choosing to buy anything
 
- CPX #160
- AND #7
+ JSR DORND              \ Set A and X to random numbers
 
- BCC L2EB9
+ CPX #160               \ Clear the C flag if X < 160
 
- LDA #0
+ AND #7                 \ Reduce A to a random number in the range 0 to 7
 
-.L2EB9
+ BCC gnum1              \ If X < 160 (62.5% chance), skip the following
+                        \ instruction
 
- AND QQ25
- STA R
+ LDA #0                 \ Set A = 0, so A is a random number in the range 0 to 7
+                        \ with a reasonably large chance of it being zero
 
- BEQ L2EC6
+.gnum1
 
- CLC
- ADC #48
- JSR TT26
+ AND QQ25               \ Reduce the random number in A into the range 0 to QQ25
 
-.L2EC6
+ STA R                  \ Store the reduced result in R
 
- LDY #50
+ BEQ gnum2              \ If the result is zero then the choice is not to buy
+                        \ anything, so skip printing the number
+
+ CLC                    \ The item number is in A, so add ASCII "0" to get the
+ ADC #'0'               \ ASCII character number to print
+
+ JSR TT26               \ Call TT26 to print the character in A so it looks like
+                        \ we have typed it in
+
+.gnum2
+
+ LDY #50                \ Wait for 50/50 of a second (1 second)
  JSR DELAY
 
- LDA R
+ LDA R                  \ Set R to the chosen menu item to return to the
 
- CMP QQ25
+ CMP QQ25               \ Set the C flag if the chosen menu item is too large
+                        \ (i.e. it is greater than or equal to QQ25), so we can
+                        \ check this on returning
 
                         \ --- End of replacement ------------------------------>
 
@@ -20204,7 +20251,9 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- JMP L2C67              \ ???
+ JMP DelayFiveSeconds   \ Wait for five seconds before returning from the
+                        \ subroutine using a tail call (so when we show the
+                        \ Inventory screen, we show it for five seconds)
 
                         \ --- End of replacement ------------------------------>
 
@@ -21918,7 +21967,9 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- JMP L2C67              \ ???
+ JMP DelayFiveSeconds   \ Wait for five seconds before returning from the
+                        \ subroutine using a tail call (so when we show the
+                        \ Market Price screen, we show it for five seconds)
 
                         \ --- End of replacement ------------------------------>
 
@@ -22444,10 +22495,15 @@ ENDIF
  LDX #0                 \ Set QQ12 to 0 to indicate we are not docked
  STX QQ12
 
- JSR LOOK1              \ ???
+ JSR LOOK1              \ Initialise the front space view
 
- LDA #&74
- JMP FRCE
+ LDA #f5                \ Jump into the main loop at FRCE, setting the key
+ JMP FRCE               \ that's "pressed" to red key f5 and returning from the
+                        \ subroutine using a tail call
+                        \
+                        \ This shows the Short-range Chart by calling TT23, and
+                        \ the updated crosshair code in TT17 demonstrates
+                        \ choosing a hyperspace destination ???
 
                         \ --- End of added code ------------------------------->
 
@@ -22728,8 +22784,9 @@ ENDIF
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #3                 \ ???
- STA QQ25
+ LDA #3                 \ Set QQ25 to 3 so we show the smallest range of
+ STA QQ25               \ equipment in the Equip Ship menu, overriding the
+                        \ value that we calculated above
 
                         \ --- End of added code ------------------------------->
 
@@ -22800,38 +22857,62 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- LDA NOMSL              \ ???
- CMP #4
+ LDA NOMSL              \ Set A to the number of missiles
 
- LDA #2
+ CMP #4                 \ Set the flags depending on whether we already have
+                        \ four missiles
 
- BCC L34DB
+ LDA #2                 \ If we have fewer than four missiles, then set A = 2 to
+ BCC equi1              \ use as the menu item for buying a missile, and jump
+                        \ to equi1 to buy a missile by "choosing" this item
 
- LDA QQ14
- CMP #70
+                        \ If we get here then we already have four missiles, so
+                        \ now we check our fuel level
 
- LDA #1
+ LDA QQ14               \ Fetch our current fuel level from Q114 into A
 
- BCC L34DB
+ CMP #70                \ Set the flags depending on whether we already have a
+                        \ full tank of fuel (7.0 light years)
 
- JSR gnum
+ LDA #1                 \ If we have less than 7.0 light years of fuel, then set
+ BCC equi1              \ A = 1 to use as the menu item for buying more fuel,
+                        \ and jump to equi1 to buy a tank of fuel by "choosing"
+                        \ this item
 
-.L34DB
+ JSR gnum               \ If we get here then we already have four missiles and
+                        \ a full tank of fuel, so call gnum to choose a random
+                        \ item from the menu, in the range 0 to QQ25 (where 0
+                        \ denotes that we are choosing not to buy anything)
+                        \
+                        \ If this returns the C flag set, then the chosen item
+                        \ is greater than or equal to QQ25, which we set to 3
+                        \ above, so the following will only let us choose to
+                        \ buy item 1 (fuel) or item 2 (missiles), as item 3
+                        \ (large cargo bay) equals QQ25 and that will be deemed
+                        \ too big and will set the C flag
 
- STA R
+.equi1
 
- BEQ L34E1
+ STA R                  \ Store the chosen menu item in R, so we can try to buy
+                        \ it
 
- BCC L34E9
+ BEQ equi2              \ If the menu item is zero then we are choosing not to
+                        \ buy anything, so jump to equi2 to move on to the Buy
+                        \ Cargo screen
 
-.L34E1
+ BCC equi3              \ If the number chosen was not too big, jump to equi3 to
+                        \ buy the chosen item
 
- JSR L2C67
+.equi2
 
- LDA #f1
- JMP TT102
+ JSR DelayFiveSeconds   \ Wait for five seconds (so when we show the Equip Ship
+                        \ screen, we wait for five seconds when we have finished
+                        \ with it)
 
-.L34E9
+ LDA #f1                \ Call TT102 to "press" the f1 key (Buy Cargo) and
+ JMP TT102              \ return from the subroutine using a tail call
+
+.equi3
 
                         \ --- End of replacement ------------------------------>
 
@@ -23045,7 +23126,8 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- JMP L34E1              \ Jump to L34E1 to ???
+ JMP equi2              \ Jump to equi2 to wait for five seconds and move on to
+                        \ the Buy Cargo screen
 
                         \ --- End of replacement ------------------------------>
 
@@ -30729,7 +30811,9 @@ ENDIF
  BNE P%+8               \ Status Mode screen
  JSR STATUS
 
- JMP L2C67              \ ???, returning from the subroutine using a tail call
+ JMP DelayFiveSeconds   \ Wait for five seconds before returning from the
+                        \ subroutine using a tail call (so when we show the
+                        \ Status Mode screen, we show it for five seconds)
 
                         \ --- End of replacement ------------------------------>
 
@@ -31479,22 +31563,43 @@ ENDIF
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #f8                \ ???
- JSR TT102
+                        \ We now show a sequence of docked screens by "pressing"
+                        \ the relevant keys and showing various screens for five
+                        \ seconds each
 
- LDA #f7
- JSR TT102
+ LDA #f8                \ Call TT102 to "press" the f8 key (Status Mode) and
+ JSR TT102              \ wait for five seconds (the delay has been added to
+                        \ TT102)
 
- LDA #f6
- JSR TT102
+ LDA #f7                \ Call TT102 to "press" the f7 key (Market Price) and
+ JSR TT102              \ wait for five seconds (the delay has been added to
+                        \ TT167)
 
- LDA #f3
- JSR TT102
+ LDA #f6                \ Call TT102 to "press" the f6 key (Data on System) and
+ JSR TT102              \ wait for five seconds (the delay has been added to
+                        \ TT25, which falls through into DelayFiveSeconds)
 
- LDA #f0
- JMP FRCE
+ LDA #f3                \ Call TT102 to "press" the f3 key (Equip Ship) to start
+ JSR TT102              \ the following sequence:
+                        \
+                        \   * Display the Equip Ship screen, buy fuel and a
+                        \     missile and wait for five seconds (see EQSHP)
+                        \
+                        \   * Show the Buy Cargo screen and buy some random
+                        \     cargo (see TT219)
+                        \
+                        \   * Show the Inventory screen and wait for five
+                        \     seconds (see TT213 and TT210)
 
- LDA #&FF
+ LDA #f0                \ Jump into the main game loop at FRCE, setting the key
+ JMP FRCE               \ "pressed" to red key f0 (so we launch from the
+                        \ station)
+
+                        \ The following code is never run, and is presumably
+                        \ left over from some experiments with which screen to
+                        \ show in this part of the demo
+
+ LDA #&FF               \ Set QQ12 to &FF to indicate we are docked
  STA QQ12
 
                         \ --- End of added code ------------------------------->
@@ -31619,10 +31724,11 @@ ENDIF
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #255               \ ???
- STA MCNT
+ LDA #255               \ Set the main loop counter in MCNT to 255, so we show
+ STA MCNT               \ the title screen for 255 iterations of the loop at
+                        \ titl1
 
-.L45D3
+.titl1
 
                         \ --- End of added code ------------------------------->
 
@@ -31682,7 +31788,8 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- BNE L45D3              \ ???
+ BNE titl1              \ Loop back to titl1 to keep showing the title screen
+                        \ until the loop counter in MCNT has reached zero
 
                         \ --- End of replacement ------------------------------>
 
@@ -32655,7 +32762,10 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #0                 \ ???
+ LDA #0                 \ This routine is never called in the demo version, but
+                        \ if it were, it would always return a zero, so this is
+                        \ presumably the remains of a code change to disable
+                        \ keyboard input that wasn't needed in the end
 
                         \ --- End of replacement ------------------------------>
 
@@ -33493,18 +33603,25 @@ ENDIF
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
-.L47A2
+.dkey1
 
- PHA                    \ ???
+                        \ We get here if KL contains a value with bit 7 set, and
+                        \ that value is in A, so now we now flush the key logger
+                        \ and clear bit 7 of KL ???
+
+ PHA                    \ Store A on the stack so we can retrieve it after the
+                        \ call to U%
 
  JSR U%                 \ Call U% to clear the key logger
 
- PLA                    \ ???
+ PLA                    \ Retrieve the value of A from the stack
 
- AND #%01111111
- STA KL
+ AND #%01111111         \ Clear bit 7 of A
 
- JMP DK2
+ STA KL                 \ Store the new value in KL, so we have now flushed the
+                        \ key logger and cleared bit 7 of KL
+
+ JMP DK2                \ Jump to DK2 to check for all the secondary flight keys
 
                         \ --- End of added code ------------------------------->
 
@@ -33536,14 +33653,17 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- LDA KL                 \ ???
- BMI L47A2
+ LDA KL                 \ Set A to the value of KL (the key pressed)
+
+ BMI dkey1              \ If KL contains a value with bit 7 set, jump to dkey1
+                        \ to flush the key logger, clear bit 7 of KL and jump
+                        \ to DK2 to check KL for all the secondary flight keys
 
  JSR U%                 \ Call U% to clear the key logger
 
  LDA hyperspaceDone     \ If hyperspaceDone = 0 then we have not yet done the
- BEQ L481D              \ hyperspace jump to Riedquat and are still in Lave, so
-                        \ jump to L481D to skip the following so we only spawn
+ BEQ dkey12             \ hyperspace jump to Riedquat and are still in Lave, so
+                        \ jump to dkey12 to skip the following so we only spawn
                         \ ships in Riedquat
 
  JSR ZINF               \ Call ZINF to reset the INWK ship workspace
@@ -33564,73 +33684,73 @@ ENDIF
  STA INWK+27
 
  LDA targetShip         \ If targetShip is zero then we do not currently have a
- BEQ L47D7              \ target, so jump to L47D7 to skip the following
+ BEQ dkey2              \ target, so jump to dkey2 to skip the following
 
                         \ If we get here then we have a target in targetShip
 
  ASL A                  \ ???
  JSR sub_C2049
 
- JMP L47DA
+ JMP dkey3
 
-.L47D7
+.dkey2
 
  JSR sub_C22D3
 
-.L47DA
+.dkey3
 
  LDA INWK+27
  CMP #32
- BCC L47E2
+ BCC dkey4
 
  LDA #32
 
-.L47E2
+.dkey4
 
  STA DELTA
 
  LDA #&FF
  LDX #0
  LDY INWK+28
- BEQ L47F1
+ BEQ dkey6
 
- BMI L47EF
+ BMI dkey5
 
  INX
 
-.L47EF
+.dkey5
 
  STA KY1,X
 
-.L47F1
+.dkey6
 
  LDA #128
  LDX #0
 
  ASL INWK+29
- BEQ L480A
+ BEQ dkey9
 
- BCC L47FC
+ BCC dkey7
 
  INX
 
-.L47FC
+.dkey7
 
  BIT INWK+29
- BPL L4806
+ BPL dkey8
 
  LDA #64
  STA JSTX
 
  LDA #0
 
-.L4806
+.dkey8
 
  STA KY3,X
 
  LDA JSTX
 
-.L480A
+.dkey9
 
  STA JSTX
 
@@ -33638,23 +33758,23 @@ ENDIF
  LDX #0
 
  ASL INWK+30
- BEQ L481B
+ BEQ dkey11
 
- BCS L4817
+ BCS dkey10
 
  INX
 
-.L4817
+.dkey10
 
  STA KY5,X
 
  LDA JSTY
 
-.L481B
+.dkey11
 
  STA JSTY
 
-.L481D
+.dkey12
 
                         \ --- End of replacement ------------------------------>
 
