@@ -2889,11 +2889,16 @@ ENDMACRO
 
 .targetShip
 
- SKIP 1                 \ ???
+ SKIP 1                 \ Our target ship
+                        \
+                        \   * 0 = no target ship
+                        \
+                        \   * Non-zero = the slot number of our target ship
 
 .attackingShip
 
- SKIP 1                 \ ???
+ SKIP 1                 \ The slot number of the ship that is firing its lasers
+                        \ at us
 
 .hyperspaceDone
 
@@ -3841,13 +3846,13 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- LDA KY19               \ ???
- AND DKCMP
- BEQ MA68
+ LDA KY19               \ If "C" is being pressed, and we have a docking
+ AND DKCMP              \ computer fitted, keep going, otherwise jump down to
+ BEQ MA68               \ MA68 to skip the following
 
- STA hyperspaceDone     \ Set hyperspaceDone to a non-ero value to indicate that
-                        \ we have done the hyperspace jump to Riedquat and have
-                        \ arrived in the new system
+ STA hyperspaceDone     \ Set hyperspaceDone to a non-zero value to indicate
+                        \ that we have done the hyperspace jump to Riedquat and
+                        \ have arrived in the new system
 
                         \ --- End of replacement ------------------------------>
 
@@ -4555,8 +4560,8 @@ ENDMACRO
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #0                 \ ???
- STA targetShip
+ LDA #0                 \ Clear our target so we no longer hunt for the target
+ STA targetShip         \ ship, as it has been destroyed
 
                         \ --- End of added code ------------------------------->
 
@@ -4780,19 +4785,19 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- LDA MCNT               \ ???
- CMP #200
- BNE L11DB
+ LDA MCNT               \ If the main loop counter is not equal to 200, jump to
+ CMP #200               \ main2 to skip the following
+ BNE main2
 
- JSR DORND
+ JSR DORND              \ Set A and X to random numbers
 
- CMP #100
- BCS L11D1
+ CMP #100               \ If A >= 100 (61% chance), jump to main1 to skip the
+ BCS main1              \ following
 
- LDA attackingShip
- STA targetShip
+ LDA attackingShip      \ Set our target to the ship that is firing its lasers
+ STA targetShip         \ at us (39% chance)
 
-.L11D1
+.main1
 
  LDA #&FF               \ Set enableLasers to a non-zero value to enable laser
  STA enableLasers       \ fire, which might have been disabled while we had a
@@ -4802,7 +4807,7 @@ ENDMACRO
  LDA #123               \ Token 123 ???
  JMP MA34
 
-.L11DB
+.main2
 
  AND #7                 \ Calculate MCNT mod 8, jumping to MA22 if it is
  BNE MA22               \ non-zero (so the following code only runs every 8
@@ -13087,7 +13092,7 @@ ENDMACRO
 
  LDA XSAV               \ Set attackingShip to the slot number of the ship that
  STA attackingShip      \ is attacking us (i.e. the ship that we are currently
-                        \ applying tactics to, and which is firing on us)
+                        \ applying tactics to, and which is firing at us)
 
  LDA targetShip         \ If we already have a target, jump to L2245 to skip the
  BNE L2245              \ following
@@ -17875,17 +17880,19 @@ ENDIF
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- PHA                    \ ???
+ PHA                    \ Store A and X on the stack
  TXA
  PHA
 
- JSR sub_C4861
+ JSR ProcessDemoKeys    \ Process the key presses that are supported in the demo
+                        \ (COPY to pause, DELETE to unpause, ESCAPE to quit, "Q"
+                        \ and "S" for sound disable/enable)
 
- PLA
+ PLA                    \ Retrieve A and X from the stack
  TAX
  PLA
 
- LDY #0
+ LDY #0                 \ Set Y = 0 to return from the subroutine
 
                         \ --- End of added code ------------------------------->
 
@@ -24797,9 +24804,9 @@ ENDIF
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDA #&FF               \ Set hyperspaceDone to a non-ero value to indicate that
- STA hyperspaceDone     \ we have done the hyperspace jump to Riedquat and have
-                        \ arrived in the new system
+ LDA #&FF               \ Set hyperspaceDone to a non-aero value to indicate
+ STA hyperspaceDone     \ that we have done the hyperspace jump to Riedquat and
+                        \ have arrived in the new system
 
                         \ --- End of added code ------------------------------->
 
@@ -33058,6 +33065,8 @@ ENDIF
 \
 \ ******************************************************************************
 
+                        \ --- Mod: Code added for Demonstration Disc: --------->
+
 .PressKey
 
  ORA #%10000000         \ Set bit 7 of the key that we need to "press", so that
@@ -33068,6 +33077,8 @@ ENDIF
                         \ specified key
 
  RTS                    \ Return from the subroutine
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -33552,10 +33563,12 @@ ENDIF
  LDA DELTA              \ Set byte #27 (speed) to DELTA, so ???
  STA INWK+27
 
- LDA targetShip         \ ???
- BEQ L47D7
+ LDA targetShip         \ If targetShip is zero then we do not currently have a
+ BEQ L47D7              \ target, so jump to L47D7 to skip the following
 
- ASL A
+                        \ If we get here then we have a target in targetShip
+
+ ASL A                  \ ???
  JSR sub_C2049
 
  JMP L47DA
@@ -33776,9 +33789,14 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- JSR sub_C4861          \ ???
+ JSR ProcessDemoKeys    \ Process the key presses that are supported in the demo
+                        \ (COPY to pause, DELETE to unpause, ESCAPE to quit, "Q"
+                        \ and "S" for sound disable/enable)
 
- LDX KL
+ LDX KL                 \ Set X to the contents of KL, which will have been set
+                        \ to the key that we want to "press" as part of the demo
+                        \ (as opposed to the genuine key presses processed
+                        \ above)
 
                         \ --- End of replacement ------------------------------>
 
@@ -33826,59 +33844,74 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: sub_C4861
+\       Name: ProcessDemoKeys
 \       Type: Subroutine
 \   Category: Demo
-\    Summary: xxx
+\    Summary: Process the key presses that are supported in the demo (COPY to
+\             pause, DELETE to unpause, ESCAPE to quit, "Q" and "S" for sound)
 \
 \ ******************************************************************************
 
-.sub_C4861
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDX #&10               \ ??? "Q"
- JSR DKS4
+.ProcessDemoKeys
 
- BPL L486D
+ LDX #&10               \ Call DKS4 to see if the "Q" key is being pressed on
+ JSR DKS4               \ the keyboard
 
- LDA #&FF
- STA DNOIZ
+ BPL keys1              \ If the key isn't being pressed, skip the following two
+                        \ instructions
 
-.L486D
+ LDA #&FF               \ "Q" is being pressed, so set DNOIZ to &FF to turn the
+ STA DNOIZ              \ sound off
 
- LDX #&51               \ "S"
- JSR DKS4
+.keys1
 
- BPL L4879
+ LDX #&51               \ Call DKS4 to see if the "S" key is being pressed on
+ JSR DKS4               \ the keyboard
 
- LDA #0
- STA DNOIZ
+ BPL keys2              \ If the key isn't being pressed, skip the following two
+                        \ instructions
 
-.L4879
+ LDA #0                 \ "S" is being pressed, so set DNOIZ to 0 to turn the
+ STA DNOIZ              \ sound on
 
- LDX #&70               \ ESCAPE
- JSR DKS4
+.keys2
 
- BPL L4883
+ LDX #&70               \ Call DKS4 to see if the ESCAPE key is being pressed on
+ JSR DKS4               \ the keyboard
 
- JMP DEATH2
+ BPL keys3              \ If the key isn't being pressed, skip the following
+                        \ instruction
 
-.L4883
+ JMP DEATH2             \ ESCAPE is being pressed, so jump to DEATH2 to restart
+                        \ the game
 
- LDX #&69               \ COPY
- JSR DKS4
+.keys3
 
- BPL L4891
+ LDX #&69               \ Call DKS4 to see if the COPY key is being pressed on
+ JSR DKS4               \ the keyboard
 
-.L488A
+ BPL keys5              \ If the key isn't being pressed, jump to keys5 to
+                        \ return from the subroutine
 
- LDX #&59               \ DELETE
- JSR DKS4
+                        \ If we get here then COPY is being pressed, so we now
+                        \ pause the game by looping around until DELETE is
+                        \ pressed to unpause the game
 
- BPL L488A
+.keys4
 
-.L4891
+ LDX #&59               \ Call DKS4 to see if the DELETE key is being pressed on
+ JSR DKS4               \ the keyboard
+
+ BPL keys4              \ If the key isn't being pressed, jump to keys4 until
+                        \ DELETE is pressed
+
+.keys5
 
  RTS                    \ Return from the subroutine
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -33980,9 +34013,18 @@ ENDIF
  STY YSAV               \ Store Y in temporary storage, so we can restore it
                         \ later
 
- LDA #0                 \ ???
+ LDA #0                 \ In theory, this should return a value of zero from the
+                        \ routine
 
- TXA
+ TXA                    \ However, it actually returns the value of X in A,
+                        \ which makes no sense as X could be anything by this
+                        \ point (perhaps this instruction should have been
+                        \ changed to TAX instead?)
+                        \
+                        \ That said, this broken version TT217 is never reached
+                        \ in the demo, as it is only called by TT214 and qv, and
+                        \ neither of these are called because the demo never
+                        \ sells cargo (TT214) or equips any lasers (qv)
 
 .out
 
@@ -35521,7 +35563,7 @@ ENDMACRO
                         \ this vertex's entry in the XX3 heap will still be 255,
                         \ which we can check in part 9 to see if the laser
                         \ vertex is visible (and therefore whether we should
-                        \ draw laser lines if the ship is firing on us)
+                        \ draw laser lines if the ship is firing at us)
 
  LDA XX1+6              \ Set (A T) = (z_hi z_lo)
  STA T
