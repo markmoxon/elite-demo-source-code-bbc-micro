@@ -12212,14 +12212,23 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: sub_C2049
+\       Name: AttackTarget
 \       Type: Subroutine
 \   Category: Demo
-\    Summary: xxx
+\    Summary: Turn towards the specified enemy target and fire lasers when we
+\             are pointing in the right direction
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   A                   The ship slot of the target * 2
 \
 \ ******************************************************************************
 
-.sub_C2049
+                        \ --- Mod: Code added for Demonstration Disc: --------->
+
+.AttackTarget
 
  TAX                    \ ???
 
@@ -12240,88 +12249,126 @@ ENDMACRO
 
  LDY #8
 
-.L2062
+.atak1
 
  LDA (V),Y
  STA K3,Y
 
  DEY
 
- BPL L2062
+ BPL atak1
 
- JSR TAS2
+ JSR TAS2               \ Call TAS2 to normalise the vector in K3, returning the
+                        \ normalised version in XX15, so XX15 contains the unit
+                        \ vector pointing from the target to the ship ???
 
- JSR TA151
+ JSR TA151              \ Call TA151 to make the ship head in the direction of
+                        \ XX15, which makes the ship turn ???
 
- LDA X2
- ASL A
- CMP #192
- BCC L208C
+                        \ In the following, ship_y and ship_z are the y and
+                        \ z-coordinates of XX15, the vector from the target to
+                        \ the ship ???
+
+ LDA XX15+2             \ Set A to ship_z
+
+ ASL A                  \ If |A * 2| < 192, i.e. |A| < 96, then the ship is not
+ CMP #192               \ lined up with the target, so jump to to atak2 to
+ BCC atak2              \ return from the subroutine ???
 
  LDA enableLasers       \ Set KY7 to enableLasers, which will "press" the laser
  STA KY7                \ fire key if lasers are enabled (as enableLasers will
                         \ be &FF if lasers are enabled, or 0 if they are
                         \ disabled during a missile lock)
 
- JSR TAS6
+ JSR TAS6               \ Call TAS6 to negate the vector in XX15 so it points in
+                        \ the opposite direction, ???
 
- JSR sub_C208D
+ JSR RefineApproach     \ Call RefineApproach to refine our approach using pitch
+                        \ and roll to aim for the target (this routine contains
+                        \ the same code as PH3 from the disc version, just
+                        \ extracted into a subroutine to it can be used to head
+                        \ for both our current enemy target and the station)
 
- BCS L208C
+ BCS atak2              \ If the C flag is set then the target is not in our
+                        \ sights, so jump to to atak2 to return from the
+                        \ subroutine
 
- LDA Y1
- ASL A
- LDA #2
+ LDA XX15+1             \ Set A = +2 or -2, giving it the same sign as ship_y,
+ ASL A                  \ and store it in byte #30, the pitch counter, so that
+ LDA #2                 \ the ship pitches towards the target
  ROR A
  STA INWK+30
 
-.L208C
+.atak2
 
- RTS
+ RTS                    \ Return from the subroutine
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
-\       Name: sub_C208D
+\       Name: RefineApproach
 \       Type: Subroutine
 \   Category: Demo
-\    Summary: xxx
+\    Summary: Refine our approach using pitch and roll to aim for the target
 \
 \ ******************************************************************************
 
-.sub_C208D
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDX #0                 \ ???
+.RefineApproach
+
+                        \ From DOCKIT, PH3
+
+ LDX #0                 \ Set RAT2 = 0
  STX RAT2
 
- STX INWK+30
+ STX INWK+30            \ Set the pitch counter to 0 to stop any pitching
 
- EOR X1
- EOR Y1
- ASL A
- LDA #2
- ROR A
- STA INWK+29
+ EOR XX15               \ A is negative, so this sets the sign of A to the same
+ EOR XX15+1             \ as -XX15 * XX15+1, or -ship_x * ship_y
 
- LDA X1
- ASL A
- CMP #12
+ ASL A                  \ Shift the sign bit into the C flag, so the C flag has
+                        \ the following sign:
+                        \
+                        \   * Positive if ship_x and ship_y have different signs
+                        \   * Negative if ship_x and ship_y have the same sign
 
- RTS
+ LDA #2                 \ Set A = +2 or -2, giving it the sign in the C flag,
+ ROR A                  \ and store it in byte #29, the roll counter, so that
+ STA INWK+29            \ the ship rolls towards the target
+
+ LDA XX15               \ If |ship_x * 2| >= 12, i.e. |ship_x| >= 6, then set
+ ASL A                  \ the C flag so when we return from the subroutine, we
+ CMP #12                \ jump to to PH22 to slow right down, as the target is
+                        \ not in our sights
+
+ RTS                    \ Return from the subroutine
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
-\       Name: sub_C20A3
+\       Name: GOPL
 \       Type: Subroutine
 \   Category: Demo
-\    Summary: xxx
+\    Summary: ???
 \
 \ ******************************************************************************
 
-.sub_C20A3
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- JSR SPS1               \ ???
+.GOPL
 
- JMP TA151
+                        \ From TACTICS (Part 3 of 7) in disc
+
+ JSR SPS1               \ The ship is not hostile and it is not docking, so call
+                        \ SPS1 to calculate the vector to the planet and store
+                        \ it in XX15
+
+ JMP TA151              \ Jump to TA151 to make the ship head towards the planet
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -13425,173 +13472,442 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: sub_C22D3
+\       Name: DOCKIT
 \       Type: Subroutine
-\   Category: Demo
-\    Summary: xxx
+\   Category: Flight
+\    Summary: Apply docking manoeuvres to the ship in INWK
+\  Deep dive: The docking computer
 \
 \ ******************************************************************************
 
-.sub_C22D3
+.DOCKIT
 
- LDA #6                 \ ???
- STA RAT2
+ LDA #6                 \ Set RAT2 = 6, which is the threshold below which we
+ STA RAT2               \ don't apply pitch and roll to the ship (so a lower
+                        \ value means we apply pitch and roll more often, and a
+                        \ value of 0 means we always apply them). The value is
+                        \ compared with double the high byte of sidev . XX15,
+                        \ where XX15 is the vector from the ship to the station
 
- LSR A
- STA RAT
+ LSR A                  \ Set RAT = 2, which is the magnitude we set the pitch
+ STA RAT                \ or roll counter to in part 7 when turning a ship
+                        \ towards a vector (a higher value giving a longer
+                        \ turn)
 
- LDA #29
- STA CNT2
+ LDA #29                \ Set CNT2 = 29, which is the maximum angle beyond which
+ STA CNT2               \ a ship will slow down to start turning towards its
+                        \ prey (a lower value means a ship will start to slow
+                        \ down even if its angle with the enemy ship is large,
+                        \ which gives a tighter turn)
 
- LDA SSPR
- BNE L22E6
+ LDA SSPR               \ If we are inside the space station safe zone, skip the
+ BNE P%+5               \ next instruction
 
-.L22E3
+.GOPLS
 
- JMP sub_C20A3
+ JMP GOPL               \ Jump to GOPL to make the ship head towards the planet
 
-.L22E6
+ JSR VCSU1              \ If we get here then we are in the space station safe
+                        \ zone, so call VCSU1 to calculate the following, where
+                        \ the station is at coordinates (station_x, station_y,
+                        \ station_z):
+                        \
+                        \   K3(2 1 0) = (x_sign x_hi x_lo) - station_x
+                        \
+                        \   K3(5 4 3) = (y_sign y_hi z_lo) - station_y
+                        \
+                        \   K3(8 7 6) = (z_sign z_hi z_lo) - station_z
+                        \
+                        \ so K3 contains the vector from the station to the ship
 
- JSR sub_C2371
+ LDA K3+2               \ If any of the top bytes of the K3 results above are
+ ORA K3+5               \ non-zero (after removing the sign bits), jump to GOPL
+ ORA K3+8               \ via GOPLS to make the ship head towards the planet, as
+ AND #%01111111         \ this will aim the ship in the general direction of the
+ BNE GOPLS              \ station (it's too far away for anything more accurate)
 
- LDA XX2+2
- ORA XX2+5
- ORA XX2+8
- AND #%01111111
+ JSR TA2                \ Call TA2 to calculate the length of the vector in K3
+                        \ (ignoring the low coordinates), returning it in Q
 
- BNE L22E3
+ LDA Q                  \ Store the value of Q in K, so K now contains the
+ STA K                  \ distance between station and the ship
 
- JSR TA2
+ JSR TAS2               \ Call TAS2 to normalise the vector in K3, returning the
+                        \ normalised version in XX15, so XX15 contains the unit
+                        \ vector pointing from the station to the ship
 
- LDA Q
- STA K
+ LDY #10                \ Call TAS4 to calculate:
+ JSR TAS4               \
+                        \   (A X) = nosev . XX15
+                        \
+                        \ where nosev is the nose vector of the space station,
+                        \ so this is the dot product of the station to ship
+                        \ vector with the station's nosev (which points straight
+                        \ out into space, out of the docking slot), and because
+                        \ both vectors are unit vectors, the following is also
+                        \ true:
+                        \
+                        \   (A X) = cos(t)
+                        \
+                        \ where t is the angle between the two vectors
+                        \
+                        \ If the dot product is positive, that means the vector
+                        \ from the station to the ship and the nosev sticking
+                        \ out of the docking slot are facing in a broadly
+                        \ similar direction (so the ship is essentially heading
+                        \ for the slot, which is facing towards the ship), and
+                        \ if it's negative they are facing in broadly opposite
+                        \ directions (so the station slot is on the opposite
+                        \ side of the station as the ship approaches)
 
- JSR TAS2
+ BMI PH1                \ If the dot product is negative, i.e. the station slot
+                        \ is on the opposite side, jump to PH1 to fly towards
+                        \ the ideal docking position, some way in front of the
+                        \ slot
 
- LDY #10
- JSR sub_C23A9
+ CMP #35                \ If the dot product < 35, jump to PH1 to fly towards
+ BCC PH1                \ the ideal docking position, some way in front of the
+                        \ slot, as there is a large angle between the vector
+                        \ from the station to the ship and the station's nosev,
+                        \ so the angle of approach is not very optimal
+                        \
+                        \ Specifically, as the unit vector length is 96 in our
+                        \ vector system,
+                        \
+                        \   (A X) = cos(t) < 35 / 96
+                        \
+                        \ so:
+                        \
+                        \   t > arccos(35 / 96) = 68.6 degrees
+                        \
+                        \ so the ship is coming in from the side of the station
+                        \ at an angle between 68.6 and 90 degrees off the
+                        \ optimal entry angle
 
- BMI L2327
+                        \ If we get here, the slot is on the same side as the
+                        \ ship and the angle of approach is less than 68.6
+                        \ degrees, so we're heading in pretty much the correct
+                        \ direction for a good approach to the docking slot
 
- CMP #35
- BCC L2327
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
- LDY #10
- JSR TAS3
+ LDY #10                \ Call TAS3 to calculate:
+ JSR TAS3               \
 
- CMP #162
- BCS L2341
+                        \ --- End of added code ------------------------------->
 
- LDA K
- CMP #157
- BCC L2319
+                        \   (A X) = nosev . XX15
+                        \
+                        \ where nosev is the nose vector of the ship, so this is
+                        \ the dot product of the station to ship vector with the
+                        \ ship's nosev, and is a measure of how close to the
+                        \ station the ship is pointing, with negative meaning it
+                        \ is pointing at the station, and positive meaning it is
+                        \ pointing away from the station
 
- BCS L2341
+ CMP #&A2               \ If the dot product is in the range 0 to -34, jump to
+ BCS PH3                \ PH3 to refine our approach, as we are pointing towards
+                        \ the station
 
-.L2319
+                        \ If we get here, then we are not pointing straight at
+                        \ the station, so check how close we are
 
- JSR TAS6
+ LDA K                  \ Fetch the distance to the station into A
 
- JSR TA151
+ CMP #157               \ If A < 157, jump to PH2 to turn away from the station,
+ BCC PH2                \ as we are too close
 
-.L231F
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
- LDX #0
+\LDA TYPE               \ Fetch the ship type into A
+\
+\BMI PH3                \ If bit 7 is set, then that means the ship type was set
+\                       \ to -96 in the DOKEY routine when we switched on our
+\                       \ docking computer, so this is us auto-docking our
+\                       \ Cobra, so jump to PH3 to refine our approach
+\                       \
+\                       \ Otherwise this is an NPC trying to dock, so keep going
+\                       \ to turn away from the station
+
+                        \ --- And replaced by: -------------------------------->
+
+ BCS PH3              \ ???
+
+                        \ --- End of replacement ------------------------------>
+
+.PH2
+
+                        \ If we get here then we turn away from the station and
+                        \ slow right down, effectively aborting this approach
+                        \ attempt
+
+ JSR TAS6               \ Call TAS6 to negate the vector in XX15 so it points in
+                        \ the opposite direction, away from the station and
+                        \ towards the ship
+
+ JSR TA151              \ Call TA151 to make the ship head in the direction of
+                        \ XX15, which makes the ship turn away from the station
+
+.PH22
+
+                        \ If we get here then we slam on the brakes and slow
+                        \ right down
+
+ LDX #0                 \ Set the acceleration in byte #28 to 0
  STX INWK+28
 
- INX
+ INX                    \ Set the speed in byte #28 to 1
  STX INWK+27
 
- RTS
+ RTS                    \ Return from the subroutine
 
-.L2327
+.PH1
 
- JSR sub_C2371
+                        \ If we get here then the slot is on the opposite side
+                        \ of the station to the ship, or it's on the same side
+                        \ and the approach angle is not optimal, so we just fly
+                        \ towards the station, aiming for the ideal docking
+                        \ position some distance in front of the slot
 
- JSR sub_C23DE
+ JSR VCSU1              \ Call VCSU1 to set K3 to the vector from the station to
+                        \ the ship
 
- JSR sub_C23DE
+ JSR DCS1               \ Call DCS1 twice to calculate the vector from the ideal
+ JSR DCS1               \ docking position to the ship, where the ideal docking
+                        \ position is straight out of the docking slot at a
+                        \ distance of 8 unit vectors from the centre of the
+                        \ station
 
- JSR TAS2
+ JSR TAS2               \ Call TAS2 to normalise the vector in K3, returning the
+                        \ normalised version in XX15
 
- JSR TAS6
+ JSR TAS6               \ Call TAS6 to negate the vector in XX15 so it points in
+                        \ the opposite direction
 
- JMP TA151
+ JMP TA151              \ Call TA151 to make the ship head in the direction of
+                        \ XX15, which makes the ship turn towards the ideal
+                        \ docking position, and return from the subroutine using
+                        \ a tail call
 
-.L2339
+.TN11
 
- INC INWK+28
+                        \ If we get here, we accelerate and apply a full
+                        \ clockwise roll (which matches the space station's
+                        \ roll)
 
- LDA #127
- STA INWK+29
+ INC INWK+28            \ Increment the acceleration in byte #28
 
- BNE L2370
+ LDA #%01111111         \ Set the roll counter to a positive (clockwise) roll
+ STA INWK+29            \ with no damping, to match the space station's roll
 
-.L2341
+ BNE TN13               \ Jump down to TN13 (this BNE is effectively a JMP as
+                        \ A will never be zero)
 
- JSR sub_C208D
+.PH3
 
- BCS L231F
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
 
- LDA Y1
- ASL A
+\                       \ If we get here, we refine our approach using pitch and
+\                       \ roll to aim for the station
+\
+\LDX #0                 \ Set RAT2 = 0
+\STX RAT2
+\
+\STX INWK+30            \ Set the pitch counter to 0 to stop any pitching
+\
+\LDA TYPE               \ If this is not our ship's docking computer, but is an
+\BPL PH32               \ NPC ship trying to dock, jump to PH32
+\
+\                       \ In the following, ship_x and ship_y are the x and
+\                       \ y-coordinates of XX15, the vector from the station to
+\                       \ the ship
+\
+\EOR XX15               \ A is negative, so this sets the sign of A to the same
+\EOR XX15+1             \ as -XX15 * XX15+1, or -ship_x * ship_y
+\
+\ASL A                  \ Shift the sign bit into the C flag, so the C flag has
+\                       \ the following sign:
+\                       \
+\                       \   * Positive if ship_x and ship_y have different signs
+\                       \   * Negative if ship_x and ship_y have the same sign
+\
+\LDA #2                 \ Set A = +2 or -2, giving it the sign in the C flag,
+\ROR A                  \ and store it in byte #29, the roll counter, so that
+\STA INWK+29            \ the ship rolls towards the station
+\
+\LDA XX15               \ If |ship_x * 2| >= 12, i.e. |ship_x| >= 6, then jump
+\ASL A                  \ to PH22 to slow right down and return from the
+\CMP #12                \ subroutine, as the station is not in our sights
+\BCS PH22
 
- LDA #2
+                        \ --- And replaced by: -------------------------------->
+
+ JSR RefineApproach     \ Call RefineApproach to refine our approach using pitch
+                        \ and roll to aim for the target (this routine contains
+                        \ the same code as PH3 from the disc version, just
+                        \ extracted into a subroutine to it can be used to head
+                        \ for both our current enemy target and the station)
+
+ BCS PH22               \ If the C flag is set then the target is not in our
+                        \ sights, so jump to to PH22 to slow right down
+
+                        \ --- End of replacement ------------------------------>
+
+ LDA XX15+1             \ Set A = +2 or -2, giving it the same sign as ship_y,
+ ASL A                  \ and store it in byte #30, the pitch counter, so that
+ LDA #2                 \ the ship pitches towards the station
  ROR A
  STA INWK+30
 
- LDA Y1
- ASL A
- CMP #12
- BCS L231F
+ LDA XX15+1             \ If |ship_y * 2| >= 12, i.e. |ship_y| >= 6, then jump
+ ASL A                  \ to PH22 to slow right down and return from the
+ CMP #12                \ subroutine, as the station is not in our sights
+ BCS PH22
 
- STX INWK+29
+.PH32
 
- LDA INWK+22
- STA X1
+                        \ If we get here, we try to match the station roll
 
- LDA INWK+24
- STA Y1
+ STX INWK+29            \ Set the roll counter to 0 to stop any pitching
 
- LDA INWK+26
- STA X2
+ LDA INWK+22            \ Set XX15 = sidev_x_hi
+ STA XX15
 
- LDY #16
- JSR sub_C23A9
+ LDA INWK+24            \ Set XX15+1 = sidev_y_hi
+ STA XX15+1
 
- ASL A
- CMP #66
- BCS L2339
+ LDA INWK+26            \ Set XX15+2 = sidev_z_hi
+ STA XX15+2             \
+                        \ so XX15 contains the sidev vector of the ship
 
- JSR L231F
+ LDY #16                \ Call TAS4 to calculate:
+ JSR TAS4               \
+                        \   (A X) = roofv . XX15
+                        \
+                        \ where roofv is the roof vector of the space station.
+                        \ To dock with the slot horizontal, we want roofv to be
+                        \ pointing off to the side, i.e. parallel to the ship's
+                        \ sidev vector, which means we want the dot product to
+                        \ be large (it can be positive or negative, as roofv can
+                        \ point left or right - it just needs to be parallel to
+                        \ the ship's sidev)
 
-.L2370
+ ASL A                  \ If |A * 2| >= 66, i.e. |A| >= 33, then the ship is
+ CMP #66                \ lined up with the slot, so jump to TN11 to accelerate
+ BCS TN11               \ and roll clockwise (a positive roll) before jumping
+                        \ down to TN13 to check if we're docked yet
 
- RTS
+ JSR PH22               \ Call PH22 to slow right down, as we haven't yet
+                        \ matched the station's roll
+
+.TN13
+
+                        \ --- Mod: Code removed for Demonstration Disc: ------->
+
+\                       \ If we get here, we check to see if we have docked
+\
+\LDA K3+10              \ If K3+10 is non-zero, skip to TNRTS, to return from
+\BNE TNRTS              \ the subroutine
+\                       \
+\                       \ I have to say I have no idea what K3+10 contains, as
+\                       \ it isn't mentioned anywhere in the whole codebase
+\                       \ apart from here, but it does share a location with
+\                       \ XX2+10, so it will sometimes be non-zero (specifically
+\                       \ when face #10 in the ship we're drawing is visible,
+\                       \ which probably happens quite a lot). This would seem
+\                       \ to affect whether an NPC ship can dock, as that's the
+\                       \ code that gets skipped if K3+10 is non-zero, but as
+\                       \ to what this means... that's not yet clear
+\
+\ASL NEWB               \ Set bit 7 of the ship's NEWB flags to indicate that
+\SEC                    \ the ship has now docked, which only has meaning if
+\ROR NEWB               \ this is an NPC trying to dock
+\
+\.TNRTS
+
+                        \ --- End of removed code ----------------------------->
+
+ RTS                    \ Return from the subroutine
 
 \ ******************************************************************************
 \
-\       Name: sub_C2371
+\       Name: VCSU1
 \       Type: Subroutine
-\   Category: Demo
-\    Summary: xxx
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate vector K3(8 0) = [x y z] - coordinates of the sun or
+\             space station
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following:
+\
+\   K3(2 1 0) = (x_sign x_hi x_lo) - x-coordinate of the sun or space station
+\
+\   K3(5 4 3) = (y_sign y_hi z_lo) - y-coordinate of the sun or space station
+\
+\   K3(8 7 6) = (z_sign z_hi z_lo) - z-coordinate of the sun or space station
+\
+\ where the first coordinate is from the ship data block in INWK, and the second
+\ coordinate is from the sun or space station's ship data block which they
+\ share.
 \
 \ ******************************************************************************
 
-.sub_C2371
+.VCSU1
 
- LDA #LO(K%+NI%)        \ ???
- STA V
- LDA #HI(K%+NI%)
- STA V+1
+ LDA #LO(K%+NI%)        \ Set the low byte of V(1 0) to point to the coordinates
+ STA V                  \ of the sun or space station
 
- LDY #2
- JSR TAS1
+ LDA #HI(K%+NI%)        \ Set A to the high byte of the address of the
+                        \ coordinates of the sun or space station
 
- LDY #5
- JSR TAS1
+                        \ Fall through into VCSUB to calculate:
+                        \
+                        \   K3(2 1 0) = (x_sign x_hi x_lo) - x-coordinate of sun
+                        \               or space station
+                        \
+                        \   K3(2 1 0) = (x_sign x_hi x_lo) - x-coordinate of sun
+                        \               or space station
+                        \
+                        \   K3(8 7 6) = (z_sign z_hi z_lo) - z-coordinate of sun
+                        \               or space station
 
- LDY #8
+\ ******************************************************************************
+\
+\       Name: VCSUB
+\       Type: Subroutine
+\   Category: Maths (Arithmetic)
+\    Summary: Calculate vector K3(8 0) = [x y z] - coordinates in (A V)
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the following:
+\
+\   K3(2 1 0) = (x_sign x_hi x_lo) - x-coordinate in (A V)
+\
+\   K3(5 4 3) = (y_sign y_hi z_lo) - y-coordinate in (A V)
+\
+\   K3(8 7 6) = (z_sign z_hi z_lo) - z-coordinate in (A V)
+\
+\ where the first coordinate is from the ship data block in INWK, and the second
+\ coordinate is from the ship data block pointed to by (A V).
+\
+\ ******************************************************************************
+
+.VCSUB
+
+ STA V+1                \ Set the low byte of V(1 0) to A, so now V(1 0) = (A V)
+
+ LDY #2                 \ K3(2 1 0) = (x_sign x_hi x_lo) - x-coordinate in data
+ JSR TAS1               \ block at V(1 0)
+
+ LDY #5                 \ K3(5 4 3) = (y_sign y_hi z_lo) - y-coordinate of data
+ JSR TAS1               \ block at V(1 0)
+
+ LDY #8                 \ Fall through into TAS1 to calculate the final result:
+                        \
+                        \ K3(8 7 6) = (z_sign z_hi z_lo) - z-coordinate of data
+                        \ block at V(1 0)
 
 \ ******************************************************************************
 \
@@ -13674,36 +13990,80 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: sub_C23A9
+\       Name: TAS4
 \       Type: Subroutine
-\   Category: Demo
-\    Summary: xxx
+\   Category: Maths (Geometry)
+\    Summary: Calculate the dot product of XX15 and one of the space station's
+\             orientation vectors
+\
+\ ------------------------------------------------------------------------------
+\
+\ Calculate the dot product of the vector in XX15 and one of the space station's
+\ orientation vectors, as determined by the value of Y. If vect is the space
+\ station orientation vector, we calculate this:
+\
+\   (A X) = vect . XX15
+\         = vect_x * XX15 + vect_y * XX15+1 + vect_z * XX15+2
+\
+\ Technically speaking, this routine can also calculate the dot product between
+\ XX15 and the sun's orientation vectors, as the sun and space station share the
+\ same ship data slot (the second ship data block at K%). However, the sun
+\ doesn't have orientation vectors, so this only gets called when that slot is
+\ being used for the space station.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   Y                   The space station's orientation vector:
+\
+\                         * If Y = 10, calculate nosev . XX15
+\
+\                         * If Y = 16, calculate roofv . XX15
+\
+\                         * If Y = 22, calculate sidev . XX15
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   (A X)               The result of the dot product
 \
 \ ******************************************************************************
 
-.sub_C23A9
+.TAS4
 
- LDX K%+NI%,Y           \ ???
+ LDX K%+NI%,Y           \ Set Q = the Y-th byte of K%+NI%, i.e. vect_x from the
+ STX Q                  \ second ship data block at K%
+
+ LDA XX15               \ Set A = XX15
+
+ JSR MULT12             \ Set (S R) = Q * A
+                        \           = vect_x * XX15
+
+ LDX K%+NI%+2,Y         \ Set Q = the Y+2-th byte of K%+NI%, i.e. vect_y
  STX Q
 
- LDA X1
- JSR MULT12
+ LDA XX15+1             \ Set A = XX15+1
 
- LDX K%+NI%+2,Y
- STX Q
+ JSR MAD                \ Set (A X) = Q * A + (S R)
+                        \           = vect_y * XX15+1 + vect_x * XX15
 
- LDA Y1
-
- JSR MAD
-
- STA S
+ STA S                  \ Set (S R) = (A X)
  STX R
 
- LDX K%+NI%+4,Y
+ LDX K%+NI%+4,Y         \ Set Q = the Y+2-th byte of K%+NI%, i.e. vect_z
  STX Q
 
- LDA X2
- JMP MAD
+ LDA XX15+2             \ Set A = XX15+2
+
+ JMP MAD                \ Set:
+                        \
+                        \   (A X) = Q * A + (S R)
+                        \           = vect_z * XX15+2 + vect_y * XX15+1 +
+                        \             vect_x * XX15
+                        \
+                        \ and return from the subroutine using a tail call
 
 \ ******************************************************************************
 \
@@ -13732,81 +14092,159 @@ ENDMACRO
 
 \ ******************************************************************************
 \
-\       Name: sub_C23DE
+\       Name: DCS1
 \       Type: Subroutine
-\   Category: Demo
-\    Summary: xxx
+\   Category: Flight
+\    Summary: Calculate the vector from the ideal docking position to the ship
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine is called by the docking computer routine in DOCKIT. It works out
+\ the vector between the ship and the ideal docking position, which is straight
+\ in front of the docking slot, but some distance away.
+\
+\ Specifically, it calculates the following:
+\
+\   * K3(2 1 0) = K3(2 1 0) - nosev_x_hi * 4
+\
+\   * K3(5 4 3) = K3(5 4 3) - nosev_y_hi * 4
+\
+\   * K3(8 7 6) = K3(8 7 6) - nosev_x_hi * 4
+\
+\ where K3 is the vector from the station to the ship, and nosev is the nose
+\ vector for the space station.
+\
+\ The nose vector points from the centre of the station through the slot, so
+\ -nosev * 4 is the vector from a point in front of the docking slot, but some
+\ way from the station, back to the centre of the station. Adding this to the
+\ vector from the station to the ship gives the vector from the point in front
+\ of the station to the ship.
+\
+\ In practice, this routine is called twice, so the ideal docking position is
+\ actually at a distance of 8 unit vectors from the centre of the station.
+\
+\ Back in DOCKIT, we flip this vector round to get the vector from the ship to
+\ the point in front of the station slot.
+\
+\ ------------------------------------------------------------------------------
+\
+\ Arguments:
+\
+\   K3                  The vector from the station to the ship
+\
+\ ------------------------------------------------------------------------------
+\
+\ Returns:
+\
+\   K3                  The vector from the ship to the ideal docking position
+\                       (4 unit vectors from the centre of the station for each
+\                       call to DCS1, so two calls will return the vector to a
+\                       point that's 8 unit vectors from the centre of the
+\                       station)
 \
 \ ******************************************************************************
 
-.sub_C23DE
+.DCS1
 
- JSR L23E1              \ ???
+ JSR P%+3               \ Run the following routine twice, so the subtractions
+                        \ are all * 4
 
-.L23E1
+ LDA K%+NI%+10          \ Set A to the space station's byte #10, nosev_x_hi
 
- LDA K%+NI%+10
- LDX #0
- JSR L23F6
+ LDX #0                 \ Set K3(2 1 0) = K3(2 1 0) - A * 2
+ JSR TAS7               \               = K3(2 1 0) - nosev_x_hi * 2
 
- LDA K%+NI%+12
- LDX #3
- JSR L23F6
+ LDA K%+NI%+12          \ Set A to the space station's byte #12, nosev_y_hi
 
- LDA K%+NI%+14
- LDX #6
+ LDX #3                 \ Set K3(5 4 3) = K3(5 4 3) - A * 2
+ JSR TAS7               \               = K3(5 4 3) - nosev_y_hi * 2
 
-.L23F6
+ LDA K%+NI%+14          \ Set A to the space station's byte #14, nosev_z_hi
 
- ASL A
- STA R
- LDA #0
- ROR A
+ LDX #6                 \ Set K3(8 7 6) = K3(8 7 6) - A * 2
+                        \               = K3(8 7 6) - nosev_x_hi * 2
 
- EOR #%10000000
- EOR XX2+2,X
- BMI L240D
+.TAS7
 
- LDA R
- ADC XX2,X
- STA XX2,X
+                        \ This routine subtracts A * 2 from one of the K3
+                        \ coordinates, as determined by the value of X:
+                        \
+                        \   * X = 0, set K3(2 1 0) = K3(2 1 0) - A * 2
+                        \
+                        \   * X = 3, set K3(5 4 3) = K3(5 4 3) - A * 2
+                        \
+                        \   * X = 6, set K3(8 7 6) = K3(8 7 6) - A * 2
+                        \
+                        \ Let's document it for X = 0, i.e. K3(2 1 0)
 
- BCC L240C
+ ASL A                  \ Shift A left one place and move the sign bit into the
+                        \ C flag, so A = |A * 2|
 
- INC XX2+1,X
+ STA R                  \ Set R = |A * 2|
 
-.L240C
+ LDA #0                 \ Rotate the sign bit of A from the C flag into the sign
+ ROR A                  \ bit of A, so A is now just the sign bit from the
+                        \ original value of A. This also clears the C flag
 
- RTS
+ EOR #%10000000         \ Flip the sign bit of A, so it has the sign of -A
 
-.L240D
+ EOR K3+2,X             \ Give A the correct sign of K3(2 1 0) * -A
 
- LDA K3,X
- SEC
- SBC R
- STA K3,X
+ BMI TS71               \ If the sign of K3(2 1 0) * -A is negative, jump to
+                        \ TS71, as K3(2 1 0) and A have the same sign
 
- LDA K3+1,X
+                        \ If we get here then K3(2 1 0) and A have different
+                        \ signs, so we can add them to do the subtraction
+
+ LDA R                  \ Set K3(2 1 0) = K3(2 1 0) + R
+ ADC K3,X               \               = K3(2 1 0) + |A * 2|
+ STA K3,X               \
+                        \ starting with the low bytes
+
+ BCC TS72               \ If the above addition didn't overflow, we have the
+                        \ result we want, so jump to TS72 to return from the
+                        \ subroutine
+
+ INC K3+1,X             \ The above addition overflowed, so increment the high
+                        \ byte of K3(2 1 0)
+
+.TS72
+
+ RTS                    \ Return from the subroutine
+
+.TS71
+
+                        \ If we get here, then K3(2 1 0) and A have the same
+                        \ sign
+
+ LDA K3,X               \ Set K3(2 1 0) = K3(2 1 0) - R
+ SEC                    \               = K3(2 1 0) - |A * 2|
+ SBC R                  \
+ STA K3,X               \ starting with the low bytes
+
+ LDA K3+1,X             \ And then the high bytes
  SBC #0
  STA K3+1,X
 
- BCS L240C
+ BCS TS72               \ If the subtraction didn't underflow, we have the
+                        \ result we want, so jump to TS72 to return from the
+                        \ subroutine
 
- LDA K3,X
- EOR #&FF
- ADC #1
- STA K3,X
+ LDA K3,X               \ Negate the result in K3(2 1 0) by flipping all the
+ EOR #%11111111         \ bits and adding 1, i.e. using two's complement to
+ ADC #1                 \ give it the opposite sign, starting with the low
+ STA K3,X               \ bytes
 
- LDA K3+1,X
- EOR #&FF
+ LDA K3+1,X             \ Then doing the high bytes
+ EOR #%11111111
  ADC #0
  STA K3+1,X
 
- LDA K3+2,X
+ LDA K3+2,X             \ And finally, flipping the sign bit
  EOR #%10000000
  STA K3+2,X
 
- JMP L240C
+ JMP TS72               \ Jump to TS72 to return from the subroutine
 
 \ ******************************************************************************
 \
@@ -33689,13 +34127,13 @@ ENDIF
                         \ If we get here then we have a target in targetShip
 
  ASL A                  \ ???
- JSR sub_C2049
+ JSR AttackTarget
 
  JMP dkey3
 
 .dkey2
 
- JSR sub_C22D3
+ JSR DOCKIT
 
 .dkey3
 
