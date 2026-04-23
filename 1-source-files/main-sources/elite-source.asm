@@ -4536,8 +4536,8 @@ ENDMACRO
  CMP #100               \ If A < 100 (39% chance), skip the following two
  BCC MA47               \ instructions
 
- LDA #&65               \ Call PressKey to "press" the "M" button to fire the
- JSR PressKey           \ missile (61% chance)
+ LDA #&65               \ Call PressMissileKey to "press" the "M" button to fire
+ JSR PressMissileKey    \ the missile (61% chance)
 
                         \ --- End of added code ------------------------------->
 
@@ -12230,50 +12230,67 @@ ENDMACRO
 
 .AttackTarget
 
- TAX                    \ ???
+ TAX                    \ Copy the target's slot number into X
 
- LDA #3
- STA RAT
+ LDA #3                 \ Set RAT = 3, which is the magnitude we set the pitch
+ STA RAT                \ or roll counter when turning a ship towards the target
+                        \ (a higher value giving a longer turn)
 
- LDA #2
- STA RAT2
+ LDA #2                 \ Set RAT2 = 2, which is the threshold below which we
+ STA RAT2               \ don't apply pitch and roll to the ship (so a lower
+                        \ value means we apply pitch and roll more often, and a
+                        \ value of 0 means we always apply them). The value is
+                        \ compared with double the high byte of sidev . XX15,
+                        \ where XX15 is the vector from the ship to the target
 
- LDA #20
- STA CNT2
+ LDA #20                \ Set CNT2 = 20, which is the maximum angle beyond which
+ STA CNT2               \ a ship will slow down to start turning towards its
+                        \ target (a lower value means a ship will start to slow
+                        \ down even if its angle with the target is large, which
+                        \ gives a tighter turn)
 
- LDA UNIV,X
- STA V
-
- LDA UNIV+1,X
+ LDA UNIV,X             \ Copy the address of the target ship's data block from
+ STA V                  \ UNIV(X+1 X) to V(1 0), which works because X contains
+ LDA UNIV+1,X           \ the number of the target's slot, multipled by 2
  STA V+1
 
- LDY #8
+ LDY #8                 \ We now copy the first nine bytes of the target's data
+                        \ block from V(1 0) into the first nine bytes of K3, so
+                        \ set a byte counter in Y
+                        \
+                        \ The first nine bytes of a ship's data block contain
+                        \ the ship's (x, y, z) coordinates in space, and our
+                        \ ship is at the origin, so this effectively sets K3 to
+                        \ the vector from our ship to the target ship
 
 .atak1
 
- LDA (V),Y
+ LDA (V),Y              \ Copy the Y-th byte from V(1 0) to the Y-th byte of K3
  STA K3,Y
 
- DEY
+ DEY                    \ Decrement the byte counter
 
- BPL atak1
+ BPL atak1              \ Loop back until we have copied all nine bytes
 
  JSR TAS2               \ Call TAS2 to normalise the vector in K3, returning the
                         \ normalised version in XX15, so XX15 contains the unit
-                        \ vector pointing from the target to the ship ???
+                        \ vector from our target to the target
 
- JSR TA151              \ Call TA151 to make the ship head in the direction of
-                        \ XX15, which makes the ship turn ???
+ JSR TA151              \ Call TA151 to make our ship head in the direction of
+                        \ XX15, which makes our ship turn towards the target
 
                         \ In the following, ship_y and ship_z are the y and
-                        \ z-coordinates of XX15, the vector from the target to
-                        \ the ship ???
+                        \ z-coordinates of XX15, the vector from the ship to
+                        \ the target
 
  LDA XX15+2             \ Set A to ship_z
 
  ASL A                  \ If |A * 2| < 192, i.e. |A| < 96, then the ship is not
- CMP #192               \ lined up with the target, so jump to to atak2 to
- BCC atak2              \ return from the subroutine ???
+ CMP #192               \ close enough to the target to fire lasers, so jump to
+ BCC atak2              \ atak2 to return from the subroutine
+
+                        \ If we get here then the target is close enough for us
+                        \ to consider firing lasers
 
  LDA enableLasers       \ Set KY7 to enableLasers, which will "press" the laser
  STA KY7                \ fire key if lasers are enabled (as enableLasers will
@@ -12281,7 +12298,8 @@ ENDMACRO
                         \ disabled during a missile lock)
 
  JSR TAS6               \ Call TAS6 to negate the vector in XX15 so it points in
-                        \ the opposite direction, ???
+                        \ the opposite direction, from the target to our ship,
+                        \ so it can be used to refine our approach to the target
 
  JSR RefineApproach     \ Call RefineApproach to refine our approach using pitch
                         \ and roll to aim for the target (this routine contains
@@ -12295,7 +12313,7 @@ ENDMACRO
 
  LDA XX15+1             \ Set A = +2 or -2, giving it the same sign as ship_y,
  ASL A                  \ and store it in byte #30, the pitch counter, so that
- LDA #2                 \ the ship pitches towards the target
+ LDA #2                 \ our ship pitches towards the target
  ROR A
  STA INWK+30
 
@@ -12318,7 +12336,8 @@ ENDMACRO
 
 .RefineApproach
 
-                        \ From DOCKIT, PH3
+                        \ The following is taken from the DOCKIT routine in the
+                        \ disc version of Elite
 
  LDX #0                 \ Set RAT2 = 0
  STX RAT2
@@ -12352,7 +12371,7 @@ ENDMACRO
 \       Name: GOPL
 \       Type: Subroutine
 \   Category: Demo
-\    Summary: ???
+\    Summary: Make the ship head towards the planet
 \
 \ ******************************************************************************
 
@@ -12360,7 +12379,8 @@ ENDMACRO
 
 .GOPL
 
-                        \ From TACTICS (Part 3 of 7) in disc
+                        \ The following is taken from part 3 of the TACTICS
+                        \ routine in the disc version of Elite
 
  JSR SPS1               \ The ship is not hostile and it is not docking, so call
                         \ SPS1 to calculate the vector to the planet and store
@@ -13150,8 +13170,8 @@ ENDMACRO
  LDA XSAV               \ We don't currently have a target but a ship is firing
  STA targetShip         \ on us, so set our target to the attacking ship
 
- LDA #&23               \ Call PressKey to "press" the "T" button to arm the
- JSR PressKey           \ missiles
+ LDA #&23               \ Call PressMissileKey to "press" the "T" button to arm
+ JSR PressMissileKey    \ a missile
 
 .L2245
 
@@ -13614,7 +13634,7 @@ ENDMACRO
  CMP #157               \ If A < 157, jump to PH2 to turn away from the station,
  BCC PH2                \ as we are too close
 
- BCS PH3                \ ???
+ BCS PH3                \ Otherwise jump to PH3 to refine our approach
 
 .PH2
 
@@ -20257,42 +20277,53 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
- LDA #f9                \ ???
- JSR TT102
+ LDA #f9                \ Call TT102 to "press" the f9 key (Inventory) and
+ JSR TT102              \ wait for five seconds (the delay has been added to
+                        \ TT210)
 
 .L2E78
 
- JSR TT22
+ JSR TT22               \ Jump to TT22 to show the Long-range Chart
 
- JSR TT103
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will erase the crosshairs currently there
 
- JSR DORND
- STA QQ9
-
- JSR DORND
+ JSR DORND              \ Set (QQ9, QQ10) to a random galactic coordinate so
+ STA QQ9                \ we select and show the distance to a randomly selected
+ JSR DORND              \ system when we "press" the "D" key below
  STA QQ10
 
- JSR TT103
+ JSR TT103              \ Draw small crosshairs at coordinates (QQ9, QQ10),
+                        \ which will draw the crosshairs at the newly chosen
+                        \ random coordinates
 
- LDA #&32
- JSR TT102
+ LDA #&32               \ Call TT102 to "press" the "D" key to move the
+ JSR TT102              \ crosshairs to the nearest system to the random
+                        \ coordinates that we just set, and then print the
+                        \ distance to that system
 
- LDY #99
+ LDY #99                \ Wait for 99/50 of a second (1.98 seconds)
  JSR DELAY
 
- JSR TT25
+ JSR TT25               \ Jump to TT25 to show the Data on System screen and
+                        \ wait for five seconds (the delay has been added to
+                        \ TT25, which falls through into DelayFiveSeconds)
 
- JSR DORND
- CMP #180
- BCC L2E78
+ JSR DORND              \ Set A and X to random numbers
 
- LDA #f8
- JSR TT102
+ CMP #180               \ If A < 180 (70% chance), loop back to L2E78 to show
+ BCC L2E78              \ data for another randomly picked system
 
- JSR ping
+ LDA #f8                \ Call TT102 to "press" the f8 key (Status Mode) and
+ JSR TT102              \ wait for five seconds (the delay has been added to
+                        \ TT102)
 
- LDA #f0
- JMP FRCE
+ JSR ping               \ Set the target system coordinates (QQ9, QQ10) to the
+                        \ current system coordinates (QQ0, QQ1) we just loaded
+
+ LDA #f0                \ Jump into the main game loop at FRCE, setting the key
+ JMP FRCE               \ "pressed" to red key f0 (so we launch from the
+                        \ station)
 
                         \ --- End of replacement ------------------------------>
 
@@ -22878,9 +22909,14 @@ ENDIF
  JMP FRCE               \ that's "pressed" to red key f5 and returning from the
                         \ subroutine using a tail call
                         \
-                        \ This shows the Short-range Chart by calling TT23, and
-                        \ the updated crosshair code in TT17 demonstrates
-                        \ choosing a hyperspace destination ???
+                        \ This shows the Short-range Chart by calling TT23,
+                        \ which then calls the TT17 routine to detect crosshair
+                        \ movement
+                        \
+                        \ TT17 has been updated to demonstrate the process of
+                        \ choosing a hyperspace destination and finishes by
+                        \ performing a hyperspace to Riedquat and switching to
+                        \ the front space view
 
                         \ --- End of added code ------------------------------->
 
@@ -29493,45 +29529,65 @@ ENDIF
  LDX #0                 \ Set the initial values for the results, X = Y = 0,
  LDY #0                 \ which we now increase or decrease appropriately
 
- LDA QQ11               \ ???
- CMP #128
- BNE L4087
+ LDA QQ11               \ If the current view is not the Short-range Chart,
+ CMP #128               \ jump to chrt3 to skip the following, so we only set
+ BNE chrt3              \ up the hyperspace jump when the chart is visible
 
- LDA QQ22+1
- BEQ L4072
+ LDA QQ22+1             \ If the on-screen hyperspace counter is zero, then we
+ BEQ chrt1              \ are not currently counting down to a hyperspace jump,
+                        \ so jump to chrt1 to keep setting up the hyperspace
+                        \ jump
 
- LDY #60
+                        \ We are currently counting down to a hyperspace jump,
+                        \ so we have already finished moving the pointer to
+                        \ Riedquat and initialising the hyperspace jump, so now
+                        \ we want to leave the Short-range Chart and switch to
+                        \ the main space view to watch the hyperspace tunnel
+
+ LDY #60                \ Wait for 60/50 of a second (1.2 seconds)
  JSR DELAY
 
- LDA #&20
+ LDA #f0                \ Set KL so that we "press" f0 to switch to the front
+ STA KL                 \ space view and leave the Short-range Chart
+
+ RTS                    \ Return from the subroutine
+
+.chrt1
+
+ DEX                    \ Set X = X - 1 to move the chart crosshairs left by
+                        \ one pixel
+
+ LDA QQ10               \ If the galactic y-coordinate of the crosshairs is 181
+ CMP #181               \ then we have already reached Riedquat, so jump to
+ BEQ chrt2              \ chrt2 to skip moving the crosshairs down, as they are
+                        \ already at the correct vertical position
+
+ DEY                    \ Set Y = Y - 1 to move the chart crosshairs down by
+                        \ one pixel
+
+.chrt2
+
+ LDA QQ9                \ If the galactic x-coordinate of the crosshairs is not
+ CMP #3                 \ yet 3 then jump to chrt3 to skip the following, so we
+ BNE chrt3              \ keep the left movement above so the crosshairs move
+                        \ left towards Riedquat
+
+ INX                    \ If we get here then we have now reached Riedquat in
+                        \ the horizontal x-axis direction, so reverse the
+                        \ decrement to put X back to zero
+                        \
+                        \ We also know that we will have reached Riedquat in the
+                        \ vertical y-axis direction by now, as Riedquat is far
+                        \ to the left of the starting point of Lave, so we need
+                        \ to do more x-axis steps than y-axis steps, so now we
+                        \ can do the hyperspace
+
+ LDA #&54               \ Set KL so that we "press" "H" to initiate a hyperspace
  STA KL
 
- RTS
+.chrt3
 
-.L4072
-
- DEX
-
- LDA QQ10
- CMP #181
- BEQ L407B
-
- DEY
-
-.L407B
-
- LDA QQ9
- CMP #3
- BNE L4087
-
- INX
-
- LDA #&54
- STA KL
-
-.L4087
-
- LDA KL
+ LDA KL                 \ Set A to the value of KL (the key being pressed)
 
                         \ --- End of replacement ------------------------------>
 
@@ -33539,7 +33595,7 @@ ENDIF
 
 \ ******************************************************************************
 \
-\       Name: PressKey
+\       Name: PressMissileKey
 \       Type: Subroutine
 \   Category: Demo
 \    Summary: "Press" a key by populating the key logger directly
@@ -33554,7 +33610,7 @@ ENDIF
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
-.PressKey
+.PressMissileKey
 
  ORA #%10000000         \ Set bit 7 of the key that we need to "press", so that
                         \ it registers as a key press when we add it to the key
@@ -33982,9 +34038,16 @@ ENDIF
 
 .dkey1
 
-                        \ We get here if KL contains a value with bit 7 set, and
-                        \ that value is in A, so now we now flush the key logger
-                        \ and clear bit 7 of KL ???
+                        \ We get here if KL contains a value with bit 7 set,
+                        \ which means we don't steer the ship but instead jump
+                        \ straight to the key press (we only put the missile
+                        \ target and fire buttons into the logger with bit 7
+                        \ set, so this ensures they take precedence over flying
+                        \ the ship
+                        \
+                        \ The key press is in A and has bit 7 set, so now we now
+                        \ flush the key logger and clear bit 7 of KL before
+                        \ jumping to DK2 to process the key press
 
  PHA                    \ Store A on the stack so we can retrieve it after the
                         \ call to U%
@@ -34030,128 +34093,201 @@ ENDIF
 
                         \ --- And replaced by: -------------------------------->
 
+                        \ The following code implements the automatic flight
+                        \ controls for the demo, so that the ship turns towards
+                        \ either the planet or the target
+                        \
+                        \ This code has been copied from the DOKEY routine in
+                        \ the disc version and is based on the code for the
+                        \ docking computer
+
  LDA KL                 \ Set A to the value of KL (the key pressed)
 
- BMI dkey1              \ If KL contains a value with bit 7 set, jump to dkey1
-                        \ to flush the key logger, clear bit 7 of KL and jump
-                        \ to DK2 to check KL for all the secondary flight keys
+ BMI dkey1              \ If KL contains a value with bit 7 set, then we must
+                        \ have called PressMissileKey to insert a missile target
+                        \ or fire key press into the key logger, in which case
+                        \ we don't want to waste time flying the ship, and
+                        \ instead we want to process the key press
+                        \
+                        \ So jump to dkey1 to flush the key logger, clear bit 7
+                        \ of KL and jump to DK2 to process the missile-related
+                        \ key press
 
  JSR U%                 \ Call U% to clear the key logger
 
  LDA hyperspaceDone     \ If hyperspaceDone = 0 then we have not yet done the
- BEQ dkey12             \ hyperspace jump to Riedquat and are still in Lave, so
-                        \ jump to dkey12 to skip the following so we only spawn
+ BEQ DK15               \ hyperspace jump to Riedquat and are still in Lave, so
+                        \ jump to DK15 to skip the following so we only spawn
                         \ ships in Riedquat
 
  JSR ZINF               \ Call ZINF to reset the INWK ship workspace
 
- LDA #&60               \ Set byte #14 (nosev_z_hi) to 1 (&60), so the launched
- STA INWK+14            \ ship is pointing away from us ???
+ LDA #96                \ Set nosev_z_hi = 96
+ STA INWK+14
 
- ORA #128               \ Set byte #22 (sidev_x_hi) to -1 (&D0), so the launched
- STA INWK+22            \ ship has the same orientation as spawned ships, just
-                        \ pointing away from us (if we set sidev to +1 instead,
-                        \ this ship would be a mirror image of all the other
-                        \ ships, which are spawned with -1 in nosev and +1 in
-                        \ sidev)
+ ORA #%10000000         \ Set sidev_x_hi = -96
+ STA INWK+22
 
- STA TYPE               \ ???
+ STA TYPE               \ Set the ship type to -96, so the negative value will
+                        \ let us check in the DOCKIT routine whether this is our
+                        \ ship that is activating its docking computer, rather
+                        \ than an NPC ship docking
+                        \
+                        \ This instruction has no effect in the demo and has
+                        \ been copied from the disc version
 
- LDA DELTA              \ Set byte #27 (speed) to DELTA, so ???
+ LDA DELTA              \ Set the ship speed to DELTA (our speed)
  STA INWK+27
 
  LDA targetShip         \ If targetShip is zero then we do not currently have a
- BEQ dkey2              \ target, so jump to dkey2 to skip the following
+ BEQ dkey2              \ target, so jump to dkey2 to skip the following and
+                        \ turn our ship towards the planet
 
-                        \ If we get here then we have a target in targetShip
+                        \ If we get here then we have a target in targetShip and
+                        \ the target's slot number is in A
 
- ASL A                  \ ???
- JSR AttackTarget
+ ASL A                  \ Double A so it can be passed to AttackTarget to use as
+                        \ a lookup into the UNIV table, which contains two bytes
+                        \ per entry
 
- JMP dkey3
+ JSR AttackTarget       \ Call AttackTarget turn towards the enemy target and
+                        \ enable lasers when we are close enough
+
+ JMP dkey3              \ Jump to dkey3 to skip the following instruction
 
 .dkey2
 
- JSR DOCKIT
+ JSR DOCKIT             \ Call DOCKIT to calculate the docking computer's moves
+                        \ and update INWK with the results
 
 .dkey3
 
- LDA INWK+27
- CMP #32
+                        \ We now "press" the relevant flight keys, depending on
+                        \ the results from DOCKIT, starting with the pitch keys
+
+ LDA INWK+27            \ Fetch the updated ship speed from byte #27 into A
+ 
+ CMP #32                \ If A < 32, skip the next instruction
  BCC dkey4
 
- LDA #32
+ LDA #32                \ Set A = 32, so the maximum speed is 32
 
 .dkey4
 
- STA DELTA
+ STA DELTA              \ Update DELTA to the new value in A
 
- LDA #&FF
- LDX #0
- LDY INWK+28
- BEQ dkey6
+ LDA #&FF               \ Set A = &FF, which we can insert into the key logger
+                        \ to "fake" the docking computer working the keyboard
 
- BMI dkey5
+ LDX #0                 \ Set X = 0, so we "press" KY1 below ("?", slow down)
 
- INX
+ LDY INWK+28            \ If the updated acceleration in byte #28 is zero, skip
+ BEQ DK11               \ to DK11
 
-.dkey5
+ BMI P%+3               \ If the updated acceleration is negative, skip the
+                        \ following instruction
 
- STA KY1,X
+ INX                    \ The updated acceleration is positive, so increment X
+                        \ to 1, so we "press" KY2 below (Space, speed up)
 
-.dkey6
+ STA KY1,X              \ Store &FF in either KY1 or KY2 to "press" the relevant
+                        \ key, depending on whether the updated acceleration is
+                        \ negative (in which case we "press" KY1, "?", to slow
+                        \ down) or positive (in which case we "press" KY2,
+                        \ Space, to speed up)
 
- LDA #128
- LDX #0
+.DK11
 
- ASL INWK+29
- BEQ dkey9
+                        \ We now "press" the relevant roll keys, depending on
+                        \ the results from DOCKIT
 
- BCC dkey7
+ LDA #128               \ Set A = 128, which indicates no change in roll when
+                        \ stored in JSTX (i.e. the centre of the roll indicator)
 
- INX
+ LDX #0                 \ Set X = 0, so we "press" KY3 below ("<", increase
+                        \ roll)
 
-.dkey7
+ ASL INWK+29            \ Shift ship byte #29 left, which shifts bit 7 of the
+                        \ updated roll counter (i.e. the roll direction) into
+                        \ the C flag
 
- BIT INWK+29
- BPL dkey8
+ BEQ DK12               \ If the remains of byte #29 is zero, then the updated
+                        \ roll counter is zero, so jump to DK12 set JSTX to 128,
+                        \ to indicate there's no change in the roll
 
- LDA #64
- STA JSTX
+ BCC P%+3               \ If the C flag is clear, skip the following instruction
 
- LDA #0
+ INX                    \ The C flag is set, i.e. the direction of the updated
+                        \ roll counter is negative, so increment X to 1 so we
+                        \ "press" KY4 below (">", decrease roll)
 
-.dkey8
+ BIT INWK+29            \ We shifted the updated roll counter to the left above,
+ BPL DK14               \ so this tests bit 6 of the original value, and if it
+                        \ is clear (i.e. the magnitude is less than 64), jump to
+                        \ DK14 to "press" the key and leave JSTX unchanged
 
- STA KY3,X
+ LDA #64                \ The magnitude of the updated roll is 64 or more, so
+ STA JSTX               \ set JSTX to 64 (so the roll decreases at half the
+                        \ maximum rate)
 
- LDA JSTX
+ LDA #0                 \ And set A = 0 so we do not "press" any keys (so if the
+                        \ docking computer needs to make a serious roll, it does
+                        \ so by setting JSTX directly rather than by "pressing"
+                        \ a key)
 
-.dkey9
+.DK14
 
- STA JSTX
+ STA KY3,X              \ Store A in either KY3 or KY4, depending on whether
+                        \ the updated roll rate is increasing (KY3) or
+                        \ decreasing (KY4)
 
- LDA #%10000000
- LDX #0
+ LDA JSTX               \ Fetch A from JSTX so the next instruction has no
+                        \ effect
 
- ASL INWK+30
- BEQ dkey11
+.DK12
 
- BCS dkey10
+ STA JSTX               \ Store A in JSTX to update the current roll rate
 
- INX
+                        \ We now "press" the relevant pitch keys, depending on
+                        \ the results from DOCKIT
 
-.dkey10
+ LDA #128               \ Set A = 128, which indicates no change in pitch when
+                        \ stored in JSTX (i.e. the centre of the pitch
+                        \ indicator)
 
- STA KY5,X
+ LDX #0                 \ Set X = 0, so we "press" KY5 below ("X", decrease
+                        \ pitch, pulling the nose up)
 
- LDA JSTY
+ ASL INWK+30            \ Shift ship byte #30 left, which shifts bit 7 of the
+                        \ updated pitch counter (i.e. the pitch direction) into
+                        \ the C flag
 
-.dkey11
+ BEQ DK13               \ If the remains of byte #30 is zero, then the updated
+                        \ pitch counter is zero, so jump to DK13 set JSTY to
+                        \ 128, to indicate there's no change in the pitch
 
- STA JSTY
+ BCS P%+3               \ If the C flag is set, skip the following instruction
 
-.dkey12
+ INX                    \ The C flag is clear, i.e. the direction of the updated
+                        \ pitch counter is positive (dive), so increment X to 1
+                        \ so we "press" KY6 below ("S", increase pitch, so the
+                        \ nose dives)
+
+ STA KY5,X              \ Store 128 in either KY5 or KY6 to "press" the relevant
+                        \ key, depending on whether the pitch direction is
+                        \ negative (in which case we "press" KY5, "X", to
+                        \ decrease the pitch, pulling the nose up) or positive
+                        \ (in which case we "press" KY6, "S", to increase the
+                        \ pitch, pushing the nose down)
+
+ LDA JSTY               \ Fetch A from JSTY so the next instruction has no
+                        \ effect
+
+.DK13
+
+ STA JSTY               \ Store A in JSTY to update the current pitch rate
+
+.DK15
 
                         \ --- End of replacement ------------------------------>
 
