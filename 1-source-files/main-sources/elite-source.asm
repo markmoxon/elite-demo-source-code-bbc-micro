@@ -13045,14 +13045,14 @@ ENDMACRO
                         \ current ship, make a noise and print a message warning
                         \ of incoming missiles
 
- BCC L2208              \ If SFRMIS returns with the C flag clear, then the
+ BCC tact1              \ If SFRMIS returns with the C flag clear, then the
                         \ missile wasn't successfully spawned, so skip the
                         \ following
 
  LDA launchedMissile    \ Set our target to the missile we just spawned, so our
  STA targetShip         \ ship will start hunting for the missile
 
-.L2208
+.tact1
 
  RTS                    \ Return from the subroutine
 
@@ -13151,21 +13151,21 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- LDA ECMA               \ If no E.C.M. is currently active, jump to L2231
- BEQ L2231
+ LDA ECMA               \ If no E.C.M. is currently active, jump to tact2
+ BEQ tact2
 
  RTS                    \ If we get here then an E.C.M. is currently active
                         \ (either ours or an opponent's), so return from the
                         \ subroutine without making the laser-strike sound
 
-.L2231
+.tact2
 
  LDA XSAV               \ Set attackingShip to the slot number of the ship that
  STA attackingShip      \ is attacking us (i.e. the ship that we are currently
                         \ applying tactics to, and which is firing at us)
 
- LDA targetShip         \ If we already have a target, jump to L2245 to skip the
- BNE L2245              \ following
+ LDA targetShip         \ If we already have a target, jump to tact3 to skip the
+ BNE tact3              \ following
 
  LDA XSAV               \ We don't currently have a target but a ship is firing
  STA targetShip         \ on us, so set our target to the attacking ship
@@ -13173,7 +13173,7 @@ ENDMACRO
  LDA #&23               \ Call PressMissileKey to "press" the "T" button to arm
  JSR PressMissileKey    \ a missile
 
-.L2245
+.tact3
 
                         \ --- End of replacement ------------------------------>
 
@@ -20281,7 +20281,7 @@ ENDIF
  JSR TT102              \ wait for five seconds (the delay has been added to
                         \ TT210)
 
-.L2E78
+.buyc1
 
  JSR TT22               \ Jump to TT22 to show the Long-range Chart
 
@@ -20311,8 +20311,8 @@ ENDIF
 
  JSR DORND              \ Set A and X to random numbers
 
- CMP #180               \ If A < 180 (70% chance), loop back to L2E78 to show
- BCC L2E78              \ data for another randomly picked system
+ CMP #180               \ If A < 180 (70% chance), loop back to buyc1 to show
+ BCC buyc1              \ data for another randomly picked system
 
  LDA #f8                \ Call TT102 to "press" the f8 key (Status Mode) and
  JSR TT102              \ wait for five seconds (the delay has been added to
@@ -29922,8 +29922,8 @@ ENDIF
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
  LDA targetShip         \ If the slot number of the ship to remove in XX4 does
- CMP XX4                \ not match our current target, jump to L411C to skip
- BNE L411C              \ the following
+ CMP XX4                \ not match our current target, jump to kill1 to skip
+ BNE kill1              \ the following
 
                         \ We just removed our target ship, so we need to remove
                         \ it as our target
@@ -29935,7 +29935,7 @@ ENDIF
  STY enableLasers       \ fire our lasers once again (in case they were disabled
                         \ during a missile lock)
 
-.L411C
+.kill1
 
                         \ --- End of added code ------------------------------->
 
