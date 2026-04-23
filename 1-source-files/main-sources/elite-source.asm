@@ -13480,6 +13480,8 @@ ENDMACRO
 \
 \ ******************************************************************************
 
+                        \ --- Mod: Code added for Demonstration Disc: --------->
+
 .DOCKIT
 
  LDA #6                 \ Set RAT2 = 6, which is the threshold below which we
@@ -13589,13 +13591,8 @@ ENDMACRO
                         \ degrees, so we're heading in pretty much the correct
                         \ direction for a good approach to the docking slot
 
-                        \ --- Mod: Code added for Demonstration Disc: --------->
-
  LDY #10                \ Call TAS3 to calculate:
  JSR TAS3               \
-
-                        \ --- End of added code ------------------------------->
-
                         \   (A X) = nosev . XX15
                         \
                         \ where nosev is the nose vector of the ship, so this is
@@ -13617,23 +13614,7 @@ ENDMACRO
  CMP #157               \ If A < 157, jump to PH2 to turn away from the station,
  BCC PH2                \ as we are too close
 
-                        \ --- Mod: Code removed for Demonstration Disc: ------->
-
-\LDA TYPE               \ Fetch the ship type into A
-\
-\BMI PH3                \ If bit 7 is set, then that means the ship type was set
-\                       \ to -96 in the DOKEY routine when we switched on our
-\                       \ docking computer, so this is us auto-docking our
-\                       \ Cobra, so jump to PH3 to refine our approach
-\                       \
-\                       \ Otherwise this is an NPC trying to dock, so keep going
-\                       \ to turn away from the station
-
-                        \ --- And replaced by: -------------------------------->
-
- BCS PH3              \ ???
-
-                        \ --- End of replacement ------------------------------>
+ BCS PH3                \ ???
 
 .PH2
 
@@ -13705,43 +13686,6 @@ ENDMACRO
 
 .PH3
 
-                        \ --- Mod: Code removed for Demonstration Disc: ------->
-
-\                       \ If we get here, we refine our approach using pitch and
-\                       \ roll to aim for the station
-\
-\LDX #0                 \ Set RAT2 = 0
-\STX RAT2
-\
-\STX INWK+30            \ Set the pitch counter to 0 to stop any pitching
-\
-\LDA TYPE               \ If this is not our ship's docking computer, but is an
-\BPL PH32               \ NPC ship trying to dock, jump to PH32
-\
-\                       \ In the following, ship_x and ship_y are the x and
-\                       \ y-coordinates of XX15, the vector from the station to
-\                       \ the ship
-\
-\EOR XX15               \ A is negative, so this sets the sign of A to the same
-\EOR XX15+1             \ as -XX15 * XX15+1, or -ship_x * ship_y
-\
-\ASL A                  \ Shift the sign bit into the C flag, so the C flag has
-\                       \ the following sign:
-\                       \
-\                       \   * Positive if ship_x and ship_y have different signs
-\                       \   * Negative if ship_x and ship_y have the same sign
-\
-\LDA #2                 \ Set A = +2 or -2, giving it the sign in the C flag,
-\ROR A                  \ and store it in byte #29, the roll counter, so that
-\STA INWK+29            \ the ship rolls towards the station
-\
-\LDA XX15               \ If |ship_x * 2| >= 12, i.e. |ship_x| >= 6, then jump
-\ASL A                  \ to PH22 to slow right down and return from the
-\CMP #12                \ subroutine, as the station is not in our sights
-\BCS PH22
-
-                        \ --- And replaced by: -------------------------------->
-
  JSR RefineApproach     \ Call RefineApproach to refine our approach using pitch
                         \ and roll to aim for the target (this routine contains
                         \ the same code as PH3 from the disc version, just
@@ -13750,8 +13694,6 @@ ENDMACRO
 
  BCS PH22               \ If the C flag is set then the target is not in our
                         \ sights, so jump to to PH22 to slow right down
-
-                        \ --- End of replacement ------------------------------>
 
  LDA XX15+1             \ Set A = +2 or -2, giving it the same sign as ship_y,
  ASL A                  \ and store it in byte #30, the pitch counter, so that
@@ -13802,32 +13744,9 @@ ENDMACRO
 
 .TN13
 
-                        \ --- Mod: Code removed for Demonstration Disc: ------->
-
-\                       \ If we get here, we check to see if we have docked
-\
-\LDA K3+10              \ If K3+10 is non-zero, skip to TNRTS, to return from
-\BNE TNRTS              \ the subroutine
-\                       \
-\                       \ I have to say I have no idea what K3+10 contains, as
-\                       \ it isn't mentioned anywhere in the whole codebase
-\                       \ apart from here, but it does share a location with
-\                       \ XX2+10, so it will sometimes be non-zero (specifically
-\                       \ when face #10 in the ship we're drawing is visible,
-\                       \ which probably happens quite a lot). This would seem
-\                       \ to affect whether an NPC ship can dock, as that's the
-\                       \ code that gets skipped if K3+10 is non-zero, but as
-\                       \ to what this means... that's not yet clear
-\
-\ASL NEWB               \ Set bit 7 of the ship's NEWB flags to indicate that
-\SEC                    \ the ship has now docked, which only has meaning if
-\ROR NEWB               \ this is an NPC trying to dock
-\
-\.TNRTS
-
-                        \ --- End of removed code ----------------------------->
-
  RTS                    \ Return from the subroutine
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -13853,6 +13772,8 @@ ENDMACRO
 \
 \ ******************************************************************************
 
+                        \ --- Mod: Code added for Demonstration Disc: --------->
+
 .VCSU1
 
  LDA #LO(K%+NI%)        \ Set the low byte of V(1 0) to point to the coordinates
@@ -13871,6 +13792,8 @@ ENDMACRO
                         \
                         \   K3(8 7 6) = (z_sign z_hi z_lo) - z-coordinate of sun
                         \               or space station
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -13894,6 +13817,8 @@ ENDMACRO
 \
 \ ******************************************************************************
 
+                        \ --- Mod: Code added for Demonstration Disc: --------->
+
 .VCSUB
 
  STA V+1                \ Set the low byte of V(1 0) to A, so now V(1 0) = (A V)
@@ -13908,6 +13833,8 @@ ENDMACRO
                         \
                         \ K3(8 7 6) = (z_sign z_hi z_lo) - z-coordinate of data
                         \ block at V(1 0)
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -14031,6 +13958,8 @@ ENDMACRO
 \
 \ ******************************************************************************
 
+                        \ --- Mod: Code added for Demonstration Disc: --------->
+
 .TAS4
 
  LDX K%+NI%,Y           \ Set Q = the Y-th byte of K%+NI%, i.e. vect_x from the
@@ -14065,6 +13994,8 @@ ENDMACRO
                         \
                         \ and return from the subroutine using a tail call
 
+                        \ --- End of added code ------------------------------->
+
 \ ******************************************************************************
 \
 \       Name: TAS6
@@ -14073,6 +14004,8 @@ ENDMACRO
 \    Summary: Negate the vector in XX15 so it points in the opposite direction
 \
 \ ******************************************************************************
+
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
 .TAS6
 
@@ -14089,6 +14022,8 @@ ENDMACRO
  STA XX15+2
 
  RTS                    \ Return from the subroutine
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
@@ -14143,6 +14078,8 @@ ENDMACRO
 \                       station)
 \
 \ ******************************************************************************
+
+                        \ --- Mod: Code added for Demonstration Disc: --------->
 
 .DCS1
 
@@ -14245,6 +14182,8 @@ ENDMACRO
  STA K3+2,X
 
  JMP TS72               \ Jump to TS72 to return from the subroutine
+
+                        \ --- End of added code ------------------------------->
 
 \ ******************************************************************************
 \
