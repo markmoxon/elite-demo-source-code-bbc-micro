@@ -12330,14 +12330,16 @@ ENDMACRO
 \   Category: Demo
 \    Summary: Refine our approach using pitch and roll to aim for the target
 \
+\ ------------------------------------------------------------------------------
+\
+\ The code in this routine has been copied from the DOCKIT routine in the disc
+\ version of Elite.
+\
 \ ******************************************************************************
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
 .RefineApproach
-
-                        \ The following is taken from the DOCKIT routine in the
-                        \ disc version of Elite
 
  LDX #0                 \ Set RAT2 = 0
  STX RAT2
@@ -12373,14 +12375,16 @@ ENDMACRO
 \   Category: Demo
 \    Summary: Make the ship head towards the planet
 \
+\ ------------------------------------------------------------------------------
+\
+\ The code in this routine has been copied from part 3 of the TACTICS routine in
+\ the disc version of Elite.
+\
 \ ******************************************************************************
 
                         \ --- Mod: Code added for Demonstration Disc: --------->
 
 .GOPL
-
-                        \ The following is taken from part 3 of the TACTICS
-                        \ routine in the disc version of Elite
 
  JSR SPS1               \ The ship is not hostile and it is not docking, so call
                         \ SPS1 to calculate the vector to the planet and store
@@ -13202,6 +13206,12 @@ ENDMACRO
 \
 \   * Speed up or slow down, depending on where the ship is in relation to us
 \
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   TA151               Make the ship head towards the planet
+\
 \ ******************************************************************************
 
 .TA4
@@ -13494,9 +13504,19 @@ ENDMACRO
 \
 \       Name: DOCKIT
 \       Type: Subroutine
-\   Category: Flight
+\   Category: Demo
 \    Summary: Apply docking manoeuvres to the ship in INWK
 \  Deep dive: The docking computer
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine has been copied from the disc version of Elite.
+\
+\ There are only minor changes: the checks against NPC ships and NEWB flags have
+\ been removed as this functionality does not apply to the demo, and the code at
+\ PH3 in the disc version has been extracted into the RefineApproach subroutine,
+\ so it can be used to refine our ship's approach for both the current enemy
+\ target and the planet/station.
 \
 \ ******************************************************************************
 
@@ -13634,7 +13654,8 @@ ENDMACRO
  CMP #157               \ If A < 157, jump to PH2 to turn away from the station,
  BCC PH2                \ as we are too close
 
- BCS PH3                \ Otherwise jump to PH3 to refine our approach
+ BCS PH3                \ Otherwise jump to PH3 to refine our approach (this BCS
+                        \ is effectively a JMP as we just passed through a BCC)
 
 .PH2
 
@@ -13708,9 +13729,10 @@ ENDMACRO
 
  JSR RefineApproach     \ Call RefineApproach to refine our approach using pitch
                         \ and roll to aim for the target (this routine contains
-                        \ the same code as PH3 from the disc version, just
-                        \ extracted into a subroutine to it can be used to head
-                        \ for both our current enemy target and the station)
+                        \ the same code as PH3 from the disc version, it's just
+                        \ been extracted into a subroutine so it can be used to
+                        \ refine our ship's approach for both the current enemy
+                        \ target and the planet/station)
 
  BCS PH22               \ If the C flag is set then the target is not in our
                         \ sights, so jump to to PH22 to slow right down
@@ -13772,7 +13794,7 @@ ENDMACRO
 \
 \       Name: VCSU1
 \       Type: Subroutine
-\   Category: Maths (Arithmetic)
+\   Category: Demo
 \    Summary: Calculate vector K3(8 0) = [x y z] - coordinates of the sun or
 \             space station
 \
@@ -13789,6 +13811,8 @@ ENDMACRO
 \ where the first coordinate is from the ship data block in INWK, and the second
 \ coordinate is from the sun or space station's ship data block which they
 \ share.
+\
+\ This routine has been copied from the disc version of Elite.
 \
 \ ******************************************************************************
 
@@ -13819,7 +13843,7 @@ ENDMACRO
 \
 \       Name: VCSUB
 \       Type: Subroutine
-\   Category: Maths (Arithmetic)
+\   Category: Demo
 \    Summary: Calculate vector K3(8 0) = [x y z] - coordinates in (A V)
 \
 \ ------------------------------------------------------------------------------
@@ -13834,6 +13858,8 @@ ENDMACRO
 \
 \ where the first coordinate is from the ship data block in INWK, and the second
 \ coordinate is from the ship data block pointed to by (A V).
+\
+\ This routine has been copied from the disc version of Elite.
 \
 \ ******************************************************************************
 
@@ -13939,7 +13965,7 @@ ENDMACRO
 \
 \       Name: TAS4
 \       Type: Subroutine
-\   Category: Maths (Geometry)
+\   Category: Demo
 \    Summary: Calculate the dot product of XX15 and one of the space station's
 \             orientation vectors
 \
@@ -13957,6 +13983,8 @@ ENDMACRO
 \ same ship data slot (the second ship data block at K%). However, the sun
 \ doesn't have orientation vectors, so this only gets called when that slot is
 \ being used for the space station.
+\
+\ This routine has been copied from the disc version of Elite.
 \
 \ ------------------------------------------------------------------------------
 \
@@ -14020,8 +14048,12 @@ ENDMACRO
 \
 \       Name: TAS6
 \       Type: Subroutine
-\   Category: Maths (Geometry)
+\   Category: Demo
 \    Summary: Negate the vector in XX15 so it points in the opposite direction
+\
+\ ------------------------------------------------------------------------------
+\
+\ This routine has been copied from the disc version of Elite.
 \
 \ ******************************************************************************
 
@@ -14049,7 +14081,7 @@ ENDMACRO
 \
 \       Name: DCS1
 \       Type: Subroutine
-\   Category: Flight
+\   Category: Demo
 \    Summary: Calculate the vector from the ideal docking position to the ship
 \
 \ ------------------------------------------------------------------------------
@@ -14080,6 +14112,8 @@ ENDMACRO
 \
 \ Back in DOCKIT, we flip this vector round to get the vector from the ship to
 \ the point in front of the station slot.
+\
+\ This routine has been copied from the disc version of Elite.
 \
 \ ------------------------------------------------------------------------------
 \
@@ -34344,6 +34378,12 @@ ENDIF
 \
 \   * If this is a space view, scan for secondary flight keys and update the
 \     relevant bytes in the key logger
+\
+\ ------------------------------------------------------------------------------
+\
+\ Other entry points:
+\
+\   DK2                 Check for all the secondary flight keys
 \
 \ ******************************************************************************
 
