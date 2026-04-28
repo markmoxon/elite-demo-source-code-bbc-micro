@@ -4472,6 +4472,7 @@ ENDMACRO
 \    Summary: For each nearby ship: Process missile lock and firing our laser
 \  Deep dive: Program flow of the main game loop
 \             Flipping axes between space views
+\             The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -4738,6 +4739,7 @@ ENDMACRO
 \    Summary: Show energy bomb effect, charge shields and energy banks
 \  Deep dive: Program flow of the main game loop
 \             Scheduling tasks with the main loop counter
+\             The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12217,6 +12219,7 @@ ENDMACRO
 \   Category: Demo
 \    Summary: Turn towards the specified enemy target and fire lasers when we
 \             are pointing in the right direction
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12329,6 +12332,7 @@ ENDMACRO
 \       Type: Subroutine
 \   Category: Demo
 \    Summary: Refine our approach using pitch and roll to aim for the target
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12374,6 +12378,7 @@ ENDMACRO
 \       Type: Subroutine
 \   Category: Demo
 \    Summary: Make the ship head towards the planet
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -12983,6 +12988,7 @@ ENDMACRO
 \   Category: Tactics
 \    Summary: Apply tactics: Consider whether to launch a missile at us
 \  Deep dive: Program flow of the tactics routine
+\             The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13069,6 +13075,7 @@ ENDMACRO
 \   Category: Tactics
 \    Summary: Apply tactics: Consider firing a laser at us, if aim is true
 \  Deep dive: Program flow of the tactics routine
+\             The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13507,6 +13514,7 @@ ENDMACRO
 \   Category: Demo
 \    Summary: Apply docking manoeuvres to the ship in INWK
 \  Deep dive: The docking computer
+\             The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13797,6 +13805,7 @@ ENDMACRO
 \   Category: Demo
 \    Summary: Calculate vector K3(8 0) = [x y z] - coordinates of the sun or
 \             space station
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13845,6 +13854,7 @@ ENDMACRO
 \       Type: Subroutine
 \   Category: Demo
 \    Summary: Calculate vector K3(8 0) = [x y z] - coordinates in (A V)
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -13968,6 +13978,7 @@ ENDMACRO
 \   Category: Demo
 \    Summary: Calculate the dot product of XX15 and one of the space station's
 \             orientation vectors
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -14050,6 +14061,7 @@ ENDMACRO
 \       Type: Subroutine
 \   Category: Demo
 \    Summary: Negate the vector in XX15 so it points in the opposite direction
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -14083,6 +14095,7 @@ ENDMACRO
 \       Type: Subroutine
 \   Category: Demo
 \    Summary: Calculate the vector from the ideal docking position to the ship
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -19611,6 +19624,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Utility routines
 \    Summary: Wait for 5.1 seconds
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ******************************************************************************
 
@@ -20113,6 +20127,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Market
 \    Summary: Show the Buy Cargo screen (red key f1)
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -22877,6 +22892,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Flight
 \    Summary: Launch from a station or show the front space view
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -23154,6 +23170,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Equipment
 \    Summary: Show the Equip Ship screen (red key f3)
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -32012,6 +32029,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Status
 \    Summary: Go to the docking bay (i.e. show the Status Mode screen)
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -33650,6 +33668,7 @@ ENDIF
 \       Type: Subroutine
 \   Category: Demo
 \    Summary: "Press" a key by populating the key logger directly
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -34065,6 +34084,7 @@ ENDIF
 \    Summary: Scan for the seven primary flight controls
 \  Deep dive: The key logger
 \             The docking computer
+\             The Elite Demonstration Disc
 \
 \ ------------------------------------------------------------------------------
 \
@@ -34539,6 +34559,7 @@ ENDIF
 \   Category: Demo
 \    Summary: Process the key presses that are supported in the demo (COPY to
 \             pause, DELETE to unpause, ESCAPE to quit, "Q" and "S" for sound)
+\  Deep dive: The Elite Demonstration Disc
 \
 \ ******************************************************************************
 
