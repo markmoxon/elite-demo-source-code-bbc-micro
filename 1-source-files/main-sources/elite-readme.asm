@@ -48,7 +48,17 @@
  EQUB 10, 13
 
  EQUB 10, 13
+ EQUS "Contains the flicker-free ship drawing"
+ EQUB 10, 13
+ EQUS "routines from the BBC Master version,"
+ EQUB 10, 13
+ EQUS "backported by Mark Moxon"
+ EQUB 10, 13
+ EQUB 10, 13
  EQUS "See www.bbcelite.com for details"
+ EQUB 10, 13
+ EQUB 10, 13
+ EQUS "Build: ", TIME$("%F %T")
  EQUB 10, 13
  EQUS "---------------------------------------"
  EQUB 10, 13

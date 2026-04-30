@@ -135,7 +135,7 @@ ENDIF
 
 IF _SOURCE_DISC
 
- D% = &563A             \ D% is set to the address of the byte after the end of
+ D% = &562A             \ D% is set to the address of the byte after the end of
                         \ the code, i.e. the byte after checksum0 at XX21
 
 ELIF _TEXT_SOURCES
