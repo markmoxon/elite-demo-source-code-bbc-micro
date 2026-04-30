@@ -56,7 +56,7 @@ protect-tape=
 prot=FALSE
 
 variant-number=1
-suffix=-demonstration-disc-flicker-free
+suffix=-demonstration-disc-tnmoc
 folder=demo
 
 .PHONY:all
