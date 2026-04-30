@@ -142,7 +142,7 @@ IF _SOURCE_DISC
 
                         \ --- And replaced by: -------------------------------->
 
- D% = &5624             \ D% is set to the address of the byte after the end of
+ D% = &5627             \ D% is set to the address of the byte after the end of
                         \ the code, i.e. the byte after checksum0 at XX21
 
                         \ --- End of replacement ------------------------------>

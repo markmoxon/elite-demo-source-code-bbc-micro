@@ -43,6 +43,8 @@
  EQUB 10, 13
  EQUS "Acornsoft Elite demonstration disc"
  EQUB 10, 13
+ EQUS "Special variant for TNMoC"
+ EQUB 10, 13
  EQUB 10, 13
  EQUS "Version: BBC Micro"
  EQUB 10, 13

@@ -4588,6 +4588,13 @@ ENDMACRO
 
                         \ --- End of added code ------------------------------->
 
+                        \ --- Mod: Code added for TNMOC: ---------------------->
+
+ STA attackingShip      \ Clear the attacking ship in case it's the target ship,
+                        \ to prevent endless searching
+
+                        \ --- End of added code ------------------------------->
+
  LDA TYPE               \ Did we just hit the space station? If so, jump to
  CMP #SST               \ MA14+2 to make the station hostile, skipping the
  BEQ MA14+2             \ following as we can't destroy a space station
@@ -7286,7 +7293,7 @@ ENDMACRO
 
 .NA%
 
-                        \ --- Mod: Code removed for Demonstration Disc: ------->
+                        \ --- Mod: Code removed for TNMOC: -------------------->
 
 \EQUS "JAMESON"         \ The current commander name, which defaults to JAMESON
 \EQUB 13                \
@@ -7296,8 +7303,8 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- EQUS "DISPLAY"         \ The current commander name, which defaults to DISPLAY
- EQUB 13                \
+ EQUS "TNMOC"           \ The current commander name, which defaults to TNMOC
+ EQUB 13, 13, 13        \
                         \ The commander name can be up to seven characters (the
                         \ DFS limit for filenames), and is terminated by a
                         \ carriage return
@@ -7349,7 +7356,7 @@ ENDMACRO
 
  EQUB 0                 \ GCNT = Galaxy number, 0-7, #15
 
-                        \ --- Mod: Code removed for Demonstration Disc: ------->
+                        \ --- Mod: Code removed for TNMOC: -------------------->
 
 \EQUB POW+(128 AND Q%)  \ LASER = Front laser, #16
 \
@@ -7357,7 +7364,7 @@ ENDMACRO
 
                         \ --- And replaced by: -------------------------------->
 
- EQUB POW               \ LASER = Front laser, #16
+ EQUB INT(128.5 + 1.5*POW)  \ LASER = Front laser, #16
 
  EQUB POW               \ LASER+1 = Rear laser, #17
 
@@ -7397,13 +7404,13 @@ ENDMACRO
 
  EQUB Q% AND 127        \ BOMB = Energy bomb, #42
 
-                        \ --- Mod: Code removed for Demonstration Disc: ------->
+                        \ --- Mod: Code removed for TNMOC: -------------------->
 
 \EQUB Q% AND 1          \ ENGY = Energy/shield level, #43
 
                         \ --- And replaced by: -------------------------------->
 
- EQUB 1                 \ ENGY = Energy/shield level, #43
+ EQUB 4                 \ ENGY = Energy/shield level, #43
 
                         \ --- End of replacement ------------------------------>
 
@@ -14764,7 +14771,11 @@ ENDMACRO
  JSR ABORT              \ missile lock and hide the leftmost indicator on the
                         \ dashboard by setting it to black (Y = 0)
 
- DEC NOMSL              \ Reduce the number of missiles we have by 1
+                        \ --- Mod: Code removed for TNMOC: -------------------->
+
+\DEC NOMSL              \ Reduce the number of missiles we have by 1
+
+                        \ --- End of removed code ----------------------------->
 
  LDA #48                \ Call the NOISE routine with A = 48 to make the sound
  JMP NOISE              \ of a missile launch, returning from the subroutine
@@ -18022,9 +18033,19 @@ ENDMACRO
  STA LASX               \ screen (#X), plus our random number, so the laser
                         \ dances to the left and right of the centre point
 
+                        \ --- Mod: Code removed for TNMOC: -------------------->
+
+\LDA GNTMP              \ Add 8 to the laser temperature in GNTMP
+\ADC #8
+\STA GNTMP
+
+                        \ --- And replaced by: -------------------------------->
+
  LDA GNTMP              \ Add 8 to the laser temperature in GNTMP
- ADC #8
+ ADC #2
  STA GNTMP
+
+                        \ --- End of replacement ------------------------------>
 
  JSR DENGY              \ Call DENGY to deplete our energy banks by 1
 
@@ -32187,6 +32208,12 @@ ENDIF
                         \ because the loader code in elite-loader.asm pushes
                         \ code onto the stack, and this effectively removes that
                         \ code so we start afresh
+
+                        \ --- Mod: Code added for TNMOC: ---------------------->
+
+ STX DNOIZ              \ Switch sound off by default
+
+                        \ --- End of added code ------------------------------->
 
                         \ Fall through into BR1 to start the game
 

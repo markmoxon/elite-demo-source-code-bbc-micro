@@ -1,6 +1,7 @@
 
 ---------------------------------------
 Acornsoft Elite demonstration disc
+Special variant for TNMoC
 
 Version: BBC Micro
 
@@ -13,6 +14,6 @@
 
 See www.bbcelite.com for details
 
-Build: 2026-04-30 12:01:38
+Build: 2026-04-30 14:52:59
 ---------------------------------------
 
