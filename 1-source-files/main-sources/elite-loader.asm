@@ -135,8 +135,17 @@ ENDIF
 
 IF _SOURCE_DISC
 
- D% = &562A             \ D% is set to the address of the byte after the end of
+                        \ --- Mod: Code removed for flicker-free planets: ----->
+
+\D% = &562A             \ D% is set to the address of the byte after the end of
+\                       \ the code, i.e. the byte after checksum0 at XX21
+
+                        \ --- And replaced by: -------------------------------->
+
+ D% = &5624             \ D% is set to the address of the byte after the end of
                         \ the code, i.e. the byte after checksum0 at XX21
+
+                        \ --- End of replacement ------------------------------>
 
 ELIF _TEXT_SOURCES
 

@@ -8,8 +8,11 @@
 routines from the BBC Master version,
 backported by Mark Moxon
 
+Contains flicker-free planet drawing
+routines by Mark Moxon
+
 See www.bbcelite.com for details
 
-Build: 2026-04-30 10:27:07
+Build: 2026-04-30 12:01:38
 ---------------------------------------
 
